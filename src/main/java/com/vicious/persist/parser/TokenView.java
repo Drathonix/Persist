@@ -1,10 +1,9 @@
-package com.vicious.persist.api.parser;
+package com.vicious.persist.parser;
 
-import com.vicious.persist.api.except.ParserException;
+import com.vicious.persist.except.ParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 import java.util.Arrays;
 
 public class TokenView {

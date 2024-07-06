@@ -1,4 +1,4 @@
-package com.vicious.persist.api.except;
+package com.vicious.persist.except;
 
 public class ParserException extends RuntimeException{
     public ParserException() {

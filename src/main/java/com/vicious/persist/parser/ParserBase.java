@@ -1,8 +1,7 @@
-package com.vicious.persist.api.parser;
+package com.vicious.persist.parser;
 
-import com.vicious.persist.api.except.ParserException;
-import com.vicious.persist.api.parser.enums.CommentType;
-import com.vicious.persist.api.parser.enums.State;
+import com.vicious.persist.except.ParserException;
+import com.vicious.persist.parser.enums.CommentType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class ParserBase2 implements IParser {
+public abstract class ParserBase implements IParser {
     protected CommentType commentState;
     protected TokenView view;
 
@@ -63,7 +62,6 @@ public abstract class ParserBase2 implements IParser {
     protected boolean skipIrrelevantData() {
         try {
             while (view.isSafe()) {
-                char c = getCurrentToken();
                 if(!isEscaped()){
                     updateCommentState();
                     if(inComment()){
@@ -71,7 +69,7 @@ public abstract class ParserBase2 implements IParser {
                         continue;
                     }
                     //Can mutate on comment checks.
-                    c = getCurrentToken();
+                    char c = getCurrentToken();
                     //Is a map or list end.
                     if(c == ']' || c == '}'){
                         return false;
@@ -112,12 +110,12 @@ public abstract class ParserBase2 implements IParser {
         try {
             StringBuilder value = new StringBuilder();
             if(getCurrentToken() == '{'){
-                ParserBase2 mapper = copy();
+                ParserBase mapper = copy();
                 view.read();
                 return mapper.mappify(view);
             }
             if(getCurrentToken() == '['){
-                ParserBase2 collector = copy();
+                ParserBase collector = copy();
                 view.read();
                 return collector.listify(view);
             }
@@ -127,7 +125,7 @@ public abstract class ParserBase2 implements IParser {
                 view.read();
                 if(!isEndOfValue()) {
                     value.append(getCurrentToken());
-                    type.append(getCurrentToken());
+                    type = type.append(getCurrentToken());
                 }
                 else{
                     return trimValue(value.toString(), type);
@@ -139,20 +137,36 @@ public abstract class ParserBase2 implements IParser {
         }
     }
 
-    protected String trimValue(String value, AssumedType type) {
+    protected Object trimValue(String value, AssumedType type) {
         try {
             value = value.trim();
+            if(type == AssumedType.CHAR && value.length() > 3){
+                type = AssumedType.STRING;
+            }
             if (type == AssumedType.STRING) {
                 char f = value.charAt(0);
                 char e = value.charAt(value.length() - 1);
                 if ("'\"".contains("" + f) || "'\"".contains("" + e)) {
-                    return value.substring(1, value.length() - 1);
+                    return convertFromString(value.substring(1, value.length() - 1),type);
                 }
             }
-            return value;
-        } catch (Throwable e) {
+            if(type == AssumedType.CHAR){
+                if(value.isEmpty()){
+                    throw new ParserException("Cannot parse a char due to an empty string.");
+                }
+                return value.length() > 1 ? value.charAt(1) : value.charAt(0);
+            }
+            return convertFromString(value,type);
+        } catch (Exception e) {
+            if(e instanceof ParserException){
+                throw e;
+            }
             throw new ParserException("Failed to trim " + value + " due to an error.",e);
         }
+    }
+
+    protected Object convertFromString(String value, AssumedType type) {
+        return value;
     }
 
     protected boolean isEndOfValue() {
@@ -178,7 +192,7 @@ public abstract class ParserBase2 implements IParser {
         return Character.isWhitespace(current);
     }
 
-    protected abstract ParserBase2 copy();
+    protected abstract ParserBase copy();
 
     @Override
     public TokenView getTokenView() {

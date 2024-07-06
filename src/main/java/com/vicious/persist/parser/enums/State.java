@@ -1,4 +1,4 @@
-package com.vicious.persist.api.parser.enums;
+package com.vicious.persist.parser.enums;
 
 public enum State {
     SKIP_IRRELEVANT {

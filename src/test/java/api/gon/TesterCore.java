@@ -1,4 +1,4 @@
-package api.parser;
+package api.gon;
 
 import java.util.Arrays;
 import java.util.List;
@@ -88,5 +88,40 @@ public class TesterCore {
                 }
             }
         }
+    }
+
+    public static void parser_write_test_file(Map<String, Object> map) {
+        checkElement("value",map,"string_key");
+        checkElement('c',map,"char_key");
+        checkElement(true,map,"boolean_key1");
+        checkElement(true,map,"boolean_key2");
+        checkElement(false,map,"boolean_key3");
+        checkElement(false,map,"boolean_key4");
+        checkElement(127L,map,"byte_key1");
+        checkElement(-128L,map,"byte_key2");
+        checkElement(25346L,map,"short_key1");
+        checkElement(-2346L,map,"short_key2");
+        checkElement(2165767L,map,"int_key1");
+        checkElement(-2165767L,map,"int_key2");
+        checkElement(2319782317897L,map,"long_key1");
+        checkElement(-2319782317897L,map,"long_key2");
+        checkElement(26423.5D,map,"float_key1");
+        checkElement(-26423.5D,map,"float_key2");
+        checkElement(26423879798.5908D,map,"double_key1");
+        checkElement(-26423879798.5908D,map,"double_key2");
+        checkElement("hi",map,"map_key","key1");
+        checkElement(true,map,"map_key","key2");
+        checkElement("value1",map,"list_key",0);
+        checkElement(1L,map,"list_key",1);
+        checkElement(5L,map,"list_key",2);
+        checkElement(true,map,"list_key",3);
+        checkElement(1L,map,"nested_map_key","nested_map_key","nested_map_key","value");
+        checkElement(2L,map,"nested_list_key",0,0,0,0,1);
+        checkElement("value",map,"chaos_key",0,"internal_map","list",0,0,"key");
+        checkElement(1L,map,"commented_list",0);
+        checkElement(2L,map,"commented_list",1);
+        checkElement(3L,map,"commented_list",2);
+        checkElement(4L,map,"commented_list",3);
+        checkNull(map,"commented_list",4);
     }
 }
