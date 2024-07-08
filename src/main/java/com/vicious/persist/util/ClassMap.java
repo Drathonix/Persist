@@ -1,4 +1,4 @@
-package com.vicious.persist;
+package com.vicious.persist.util;
 
 import java.util.IdentityHashMap;
 

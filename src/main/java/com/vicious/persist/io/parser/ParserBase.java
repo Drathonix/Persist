@@ -1,7 +1,7 @@
-package com.vicious.persist.parser;
+package com.vicious.persist.io.parser;
 
 import com.vicious.persist.except.ParserException;
-import com.vicious.persist.parser.enums.CommentType;
+import com.vicious.persist.io.parser.enums.CommentType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -144,6 +144,9 @@ public abstract class ParserBase implements IParser {
                 type = AssumedType.STRING;
             }
             if (type == AssumedType.STRING) {
+                if(value.equalsIgnoreCase("null")){
+                    return null;
+                }
                 char f = value.charAt(0);
                 char e = value.charAt(value.length() - 1);
                 if ("'\"".contains("" + f) || "'\"".contains("" + e)) {

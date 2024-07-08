@@ -1,4 +1,4 @@
-package com.vicious.persist.parser.enums;
+package com.vicious.persist.io.parser.enums;
 
 public enum ValueType {
     STRING{

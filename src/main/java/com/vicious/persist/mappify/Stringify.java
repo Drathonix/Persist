@@ -1,4 +1,6 @@
-package com.vicious.persist;
+package com.vicious.persist.mappify;
+
+import com.vicious.persist.util.ClassMap;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -67,7 +69,11 @@ public class Stringify {
             return converter.stringToObject.apply(str);
         }
     }
-    
+
+    public static boolean present(Class<?> cls) {
+        return converters.containsKey(cls);
+    }
+
     private static class Converter<T> {
         Function<String,T> stringToObject;
         Function<T,String> objectToString;

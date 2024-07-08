@@ -1,4 +1,4 @@
-package com.vicious.persist.parser;
+package com.vicious.persist.io.parser;
 
 public enum AssumedType {
     UNKNOWN{

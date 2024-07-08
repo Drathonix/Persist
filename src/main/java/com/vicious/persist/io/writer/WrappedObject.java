@@ -1,4 +1,4 @@
-package com.vicious.persist.writer;
+package com.vicious.persist.io.writer;
 
 import org.jetbrains.annotations.NotNull;
 

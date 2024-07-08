@@ -1,4 +1,4 @@
-package com.vicious.persist.parser;
+package com.vicious.persist.io.parser;
 
 import com.vicious.persist.except.ParserException;
 

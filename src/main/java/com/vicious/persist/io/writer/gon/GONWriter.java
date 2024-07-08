@@ -1,9 +1,9 @@
-package com.vicious.persist.writer.gon;
+package com.vicious.persist.io.writer.gon;
 
-import com.vicious.persist.Stringify;
+import com.vicious.persist.mappify.Stringify;
 import com.vicious.persist.except.WriterException;
-import com.vicious.persist.writer.IWriter;
-import com.vicious.persist.writer.WrappedObject;
+import com.vicious.persist.io.writer.WrappedObject;
+import com.vicious.persist.io.writer.IWriter;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -121,6 +121,10 @@ public class GONWriter implements IWriter {
             writeCollection((Collection<Object>)value,out,depth+1);
             tabs(out,tabWidth*depth);
             out.write(']');
+            return;
+        }
+        if(value == null){
+            out.write("null".getBytes(StandardCharsets.UTF_8));
             return;
         }
         String stringifiedObject = Stringify.stringify(value);

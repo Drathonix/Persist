@@ -1,9 +1,9 @@
-package com.vicious.persist.parser.gon;
+package com.vicious.persist.io.parser.gon;
 
-import com.vicious.persist.Stringify;
-import com.vicious.persist.parser.AssumedType;
-import com.vicious.persist.parser.IParser;
-import com.vicious.persist.parser.ParserBase;
+import com.vicious.persist.mappify.Stringify;
+import com.vicious.persist.io.parser.AssumedType;
+import com.vicious.persist.io.parser.IParser;
+import com.vicious.persist.io.parser.ParserBase;
 
 public class GONParser extends ParserBase implements IParser {
     public boolean castValues = true;

@@ -1,7 +1,7 @@
-package com.vicious.persist.parser;
+package com.vicious.persist.io.parser;
 
 import com.vicious.persist.except.ParserException;
-import com.vicious.persist.parser.enums.CommentType;
+import com.vicious.persist.io.parser.enums.CommentType;
 
 import java.io.IOException;
 import java.io.InputStream;

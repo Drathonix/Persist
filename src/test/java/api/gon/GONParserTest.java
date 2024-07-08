@@ -1,6 +1,6 @@
 package api.gon;
 
-import com.vicious.persist.parser.gon.GONParser;
+import com.vicious.persist.io.parser.gon.GONParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
