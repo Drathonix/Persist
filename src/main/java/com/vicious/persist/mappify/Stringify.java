@@ -49,6 +49,9 @@ public class Stringify {
 
     @SuppressWarnings("unchecked")
     public static <T> String stringify(T obj) {
+        if(obj == null){
+            return "null";
+        }
         Class<?> cls = obj.getClass();
         Converter<T> converter = (Converter<T>) converters.get(cls);
         if (converter == null) {
@@ -61,6 +64,9 @@ public class Stringify {
 
     @SuppressWarnings("unchecked")
     public static <T> T objectify(Class<T> cls, String str) {
+        if(str.equals("null")){
+            return null;
+        }
         Converter<T> converter = (Converter<T>) converters.get(cls);
         if (converter == null) {
             throw new IllegalArgumentException("No toObject converter registered for " + cls);

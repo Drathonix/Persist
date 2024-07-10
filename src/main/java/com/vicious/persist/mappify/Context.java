@@ -2,6 +2,8 @@ package com.vicious.persist.mappify;
 
 import com.vicious.persist.util.ClassMap;
 
+import java.util.function.Consumer;
+
 public class Context {
     private static final ClassMap<ClassData> classData = new ClassMap<>();
 
@@ -29,7 +31,11 @@ public class Context {
         return type;
     }
 
-    public void forEach(ClassData.FieldAccessor fieldAccessor) {
-        data.forEach(source, isStatic, fieldAccessor::access);
+    public void forEach(Consumer<FieldData<?>> consumer) {
+        data.forEach(isStatic, consumer);
+    }
+
+    public boolean hasMappifiableTraits() {
+        return data.hasTraitsInContext(isStatic);
     }
 }

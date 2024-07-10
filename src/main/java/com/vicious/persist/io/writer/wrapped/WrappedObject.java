@@ -1,6 +1,8 @@
-package com.vicious.persist.io.writer;
+package com.vicious.persist.io.writer.wrapped;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class WrappedObject {
     public final Object object;
@@ -11,13 +13,9 @@ public class WrappedObject {
         comment = "";
     }
 
-    public WrappedObject(Object object, @NotNull String comment) {
+    public WrappedObject(Object object, String comment) {
         this.object = object;
-        if(comment == null){
-            throw new IllegalArgumentException("Comment cannot be null, use empty string instead.");
-        }
-        this.comment = comment;
-
+        this.comment = Objects.requireNonNullElse(comment, "");
     }
 
     public static WrappedObject of(Object object) {
@@ -44,5 +42,15 @@ public class WrappedObject {
         else{
             return "";
         }
+    }
+
+    public static WrappedObject nullified() {
+        return of(null);
+    }
+
+    @Override
+    public String toString() {
+        String s = object instanceof String ? "\"" : (object instanceof Character ? "'" : "");
+        return "(" + s + object.toString() + s + ")";
     }
 }

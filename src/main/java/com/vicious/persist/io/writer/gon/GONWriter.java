@@ -2,7 +2,7 @@ package com.vicious.persist.io.writer.gon;
 
 import com.vicious.persist.mappify.Stringify;
 import com.vicious.persist.except.WriterException;
-import com.vicious.persist.io.writer.WrappedObject;
+import com.vicious.persist.io.writer.wrapped.WrappedObject;
 import com.vicious.persist.io.writer.IWriter;
 import org.jetbrains.annotations.NotNull;
 
