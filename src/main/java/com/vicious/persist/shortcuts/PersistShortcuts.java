@@ -56,4 +56,9 @@ public class PersistShortcuts {
             throw new RuntimeException(e);
         }
     }
+
+    public static void init(Object obj){
+        readFromFile(obj);
+        saveAsFile(obj);
+    }
 }
