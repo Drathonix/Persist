@@ -1,4 +1,7 @@
 # Persist
- The Vicious Lib Persistence system separated into its own library.
+An Annotation-Driven Persistence Library for Java.
 
-# Not yet finished
+## Basics
+
+# Credits
+Includes [Annotation Detector](https://github.com/rmuller/infomas-asl/tree/master), the original maven has seemingly shut down so it has been included locally.
