@@ -1,4 +1,4 @@
-package com.vicious.persist.mappify;
+package com.vicious.persist.mappify.registry;
 
 import com.vicious.persist.util.ClassMap;
 
@@ -56,7 +56,7 @@ public class Stringify {
         Converter<T> converter = (Converter<T>) converters.get(cls);
         if (converter == null) {
             if(obj instanceof Enum<?>){
-                return ((Enum<?>) obj).name();
+                return "\"" + ((Enum<?>) obj).name() + "\"";
             }
             throw new IllegalArgumentException("No toString converter registered for " + cls);
         }
@@ -65,10 +65,13 @@ public class Stringify {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked","rawtypes"})
     public static <T> T objectify(Class<T> cls, String str) {
         if(str.equals("null")){
             return null;
+        }
+        if(cls.isEnum()){
+            return (T)Enum.valueOf((Class)cls,str);
         }
         Converter<T> converter = (Converter<T>) converters.get(cls);
         if (converter == null) {

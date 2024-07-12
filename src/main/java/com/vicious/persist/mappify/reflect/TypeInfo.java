@@ -1,7 +1,7 @@
-package com.vicious.persist.mappify;
+package com.vicious.persist.mappify.reflect;
 
-import com.vicious.persist.annotations.Typing;
 import com.vicious.persist.except.InvalidSavableElementException;
+import com.vicious.persist.mappify.registry.Stringify;
 
 import java.util.Collection;
 import java.util.Map;

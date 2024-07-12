@@ -1,14 +1,15 @@
-package com.vicious.persist.mappify;
+package com.vicious.persist.mappify.reflect;
 
 import com.vicious.persist.annotations.Range;
 import com.vicious.persist.annotations.Save;
 import com.vicious.persist.annotations.Typing;
 import com.vicious.persist.except.InvalidSavableElementException;
+import com.vicious.persist.mappify.Context;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
 
-public class FieldData<T extends AccessibleObject & Member> implements TypeInfo{
+public class FieldData<T extends AccessibleObject & Member> implements TypeInfo {
     public final T getterElement;
     public final Save saveData;
     public final Range rangeData;

@@ -1,7 +1,12 @@
-package com.vicious.persist.mappify;
+package com.vicious.persist.mappify.reflect;
 
+import com.vicious.persist.annotations.PersistentPath;
 import com.vicious.persist.annotations.Save;
+import com.vicious.persist.except.InvalidAnnotationException;
 import com.vicious.persist.except.InvalidSavableElementException;
+import com.vicious.persist.mappify.Context;
+import com.vicious.persist.mappify.registry.Reserved;
+import com.vicious.persist.shortcuts.NotationFormat;
 
 import java.lang.reflect.*;
 import java.util.HashMap;
@@ -10,6 +15,7 @@ import java.util.function.Consumer;
 
 public class ClassData {
     private final Map<String, FieldData<?>> savableFields = new HashMap<>();
+    private final PathFieldData<?>[] persistentPath = new PathFieldData[2];
     private static void forEach(Class<?> cls, Consumer<Class<?>> consumer){
         if(cls != null){
             consumer.accept(cls);
@@ -24,10 +30,14 @@ public class ClassData {
         forEach(c,cls->{
             for (Method m1 : cls.getDeclaredMethods()) {
                 Save save = m1.getAnnotation(Save.class);
+                PersistentPath path = m1.getAnnotation(PersistentPath.class);
                 if(save != null){
                     String name = save.value().isEmpty() ? m1.getName() : save.value();
                     if(Modifier.isAbstract(m1.getModifiers())){
                         throw new InvalidSavableElementException("Abstract method " + m1.getName() + " in " + m1.getDeclaringClass() + " @Save(\"" + name + "\"), this is illegal. Maybe you should create a wrapper method instead.");
+                    }
+                    if(Reserved.isReserved(name)){
+                        throw new InvalidSavableElementException("Method " + m1.getName() + " in " + m1.getDeclaringClass() + " @Save(\"" + name + "\"), has a reserved name! Use a different name.");
                     }
                     if(savableFields.containsKey(name)){
                         continue;
@@ -37,7 +47,7 @@ public class ClassData {
                         Save.Setter saveSetter = declaredMethod.getAnnotation(Save.Setter.class);
                         if(saveSetter != null){
                             if(Modifier.isAbstract(declaredMethod.getModifiers())){
-                                throw new InvalidSavableElementException("Abstract method " + declaredMethod.getName() + " in " + declaredMethod.getDeclaringClass() + " @Save.Setter(\"" + saveSetter.value() + "\"), this is illegal. Maybe you should create a wrapper method instead.");
+                                throw new InvalidAnnotationException("Abstract method " + declaredMethod.getName() + " in " + declaredMethod.getDeclaringClass() + " @Save.Setter(\"" + saveSetter.value() + "\"), this is illegal. Maybe you should create a wrapper method instead.");
                             }
                             if(saveSetter.value().equals(name) && staticMatches(m1,declaredMethod)){
                                 setter = declaredMethod;
@@ -47,13 +57,27 @@ public class ClassData {
                     }
                     savableFields.put(name, new FieldData<>(m1,setter));
                 }
+                if(path != null){
+                    int idx = Modifier.isStatic(m1.getModifiers()) ? 1 : 0;
+                    if(persistentPath[idx] != null){
+                        continue;
+                    }
+                    if(m1.getReturnType() != String.class || m1.getParameterCount() != 0){
+                        throw new InvalidAnnotationException("@Persistent path applied to non-String returning parameterless method: " + m1.getName() + " in " + m1.getDeclaringClass());
+                    }
+                    persistentPath[idx] = new PathFieldData<>(m1);
+                }
             }
             for (Field field : cls.getDeclaredFields()) {
                 Save save = field.getAnnotation(Save.class);
+                PersistentPath path = field.getAnnotation(PersistentPath.class);
                 if(save != null){
                     String name = save.value().isEmpty() ? field.getName() : save.value();
                     if(savableFields.containsKey(name)){
                         continue;
+                    }
+                    if(Reserved.isReserved(name)){
+                        throw new InvalidSavableElementException("Field " + field.getName() + " in " + field.getDeclaringClass() + " @Save(\"" + name + "\"), has a reserved name! Use a different name.");
                     }
                     Method setter = null;
                     for (Method declaredMethod : cls.getDeclaredMethods()) {
@@ -66,6 +90,16 @@ public class ClassData {
                         }
                     }
                     savableFields.put(name, new FieldData<>(field,setter));
+                }
+                if(path != null){
+                    int idx = Modifier.isStatic(field.getModifiers()) ? 1 : 0;
+                    if(persistentPath[idx] != null){
+                        continue;
+                    }
+                    if(field.getType() != String.class){
+                        throw new InvalidSavableElementException("@Persistent path applied to non-String field: " + field.getName() + " in " + field.getDeclaringClass());
+                    }
+                    persistentPath[idx] = new PathFieldData<>(field);
                 }
             }
         });
@@ -99,5 +133,23 @@ public class ClassData {
             consumer.accept(field);
 
         }
+    }
+
+    public PathFieldData<?> getPersistentPathAnnotation(Context context){
+        int idx = context.isStatic ? 1 : 0;
+        if(persistentPath[idx] != null){
+            return persistentPath[idx];
+        }
+        else{
+            throw new IllegalArgumentException(context.getType() + " is missing an @PersistentPath annotated method or field in the " + (context.isStatic ? "static" : "non-static") + " context!");
+        }
+    }
+
+    public String getPersistentPath(Context context){
+        return (String)getPersistentPathAnnotation(context).get(context);
+    }
+
+    public NotationFormat getPersistentPathFormat(Context context) {
+        return getPersistentPathAnnotation(context).path.value();
     }
 }

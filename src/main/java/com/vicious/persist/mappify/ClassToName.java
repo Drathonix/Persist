@@ -1,7 +1,8 @@
 package com.vicious.persist.mappify;
 
 import com.vicious.persist.annotations.C_NAME;
-import com.vicious.persist.util.ClassMap;
+import com.vicious.persist.except.InvalidAnnotationException;
+import com.vicious.persist.mappify.registry.Stringify;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +16,7 @@ public class ClassToName {
             map.put(name, cls);
         }
         else{
-            throw new RuntimeException("Attempted to register multiple classes as: " + name + ", " + cls.getName() + " conflicted with: " + map.get(name));
+            throw new InvalidAnnotationException("Attempted to register multiple classes as: " + name + ", " + cls.getName() + " conflicted with: " + map.get(name));
         }
     }
 

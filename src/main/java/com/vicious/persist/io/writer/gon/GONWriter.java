@@ -1,6 +1,6 @@
 package com.vicious.persist.io.writer.gon;
 
-import com.vicious.persist.mappify.Stringify;
+import com.vicious.persist.mappify.registry.Stringify;
 import com.vicious.persist.except.WriterException;
 import com.vicious.persist.io.writer.wrapped.WrappedObject;
 import com.vicious.persist.io.writer.IWriter;
@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.Map;
 
 public class GONWriter implements IWriter {
+    public static final GONWriter DEFAULT = new GONWriter();
+
     private Separation listValueSeparator = Separation.NEWLINE;
     private Separation mapEntrySeparator = Separation.NEWLINE;
     private int tabWidth = 1;

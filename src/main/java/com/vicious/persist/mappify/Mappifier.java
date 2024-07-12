@@ -5,6 +5,11 @@ import com.vicious.persist.except.InvalidValueException;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectList;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectMap;
 import com.vicious.persist.io.writer.wrapped.WrappedObject;
+import com.vicious.persist.mappify.reflect.FieldData;
+import com.vicious.persist.mappify.reflect.TypeInfo;
+import com.vicious.persist.mappify.registry.Initializers;
+import com.vicious.persist.mappify.registry.Reserved;
+import com.vicious.persist.mappify.registry.Stringify;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -164,7 +169,7 @@ public class Mappifier {
             Object unmapped = unmappifyValue(data, data.get(context), data.isRaw(), parsedValue,0);
             data.set(context,unmapped);
         } catch (Throwable t){
-            throw new InvalidSavableElementException("Could not mappify field " + data.getFieldName() + " in " + context.getType(),t);
+            throw new InvalidSavableElementException("Could not unmappify field " + data.getFieldName() + " in " + context.getType(),t);
         }
     }
 

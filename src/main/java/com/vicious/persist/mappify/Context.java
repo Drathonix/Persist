@@ -1,5 +1,8 @@
 package com.vicious.persist.mappify;
 
+import com.vicious.persist.mappify.reflect.ClassData;
+import com.vicious.persist.mappify.reflect.FieldData;
+import com.vicious.persist.shortcuts.NotationFormat;
 import com.vicious.persist.util.ClassMap;
 
 import java.util.function.Consumer;
@@ -45,5 +48,13 @@ public class Context {
 
     public boolean hasMappifiableTraits(boolean b) {
         return data.hasTraitsInContext(b);
+    }
+
+    public String getPersistentPath() {
+        return data.getPersistentPath(this);
+    }
+
+    public NotationFormat getPersistentPathFormat() {
+        return data.getPersistentPathFormat(this);
     }
 }

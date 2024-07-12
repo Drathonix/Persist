@@ -1,12 +1,14 @@
 package com.vicious.persist.io.parser.gon;
 
 import com.vicious.persist.except.ParserException;
-import com.vicious.persist.mappify.Stringify;
+import com.vicious.persist.mappify.registry.Stringify;
 import com.vicious.persist.io.parser.AssumedType;
 import com.vicious.persist.io.parser.IParser;
 import com.vicious.persist.io.parser.ParserBase;
 
 public class GONParser extends ParserBase implements IParser {
+    public static final GONParser DEFAULT = new GONParser();
+
     public boolean castValues = true;
 
     public GONParser() {}

@@ -1,7 +1,6 @@
-package com.vicious.persist.mappify;
+package com.vicious.persist.mappify.registry;
 
 import com.vicious.persist.except.CannotInitializeException;
-import com.vicious.persist.except.InvalidValueException;
 import com.vicious.persist.util.ClassMap;
 
 import java.lang.reflect.Constructor;
