@@ -12,7 +12,7 @@ public class BadTestObject5 {
     }
 
     @Save
-    public int int0(){
+    public int int1(){
         return int0;
     }
 }

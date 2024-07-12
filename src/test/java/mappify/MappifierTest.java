@@ -1,5 +1,6 @@
 package mappify;
 
+import com.vicious.persist.Persist;
 import com.vicious.persist.io.writer.wrapped.WrappedObject;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectMap;
 import com.vicious.persist.mappify.Mappifier;
@@ -7,18 +8,24 @@ import mappify.collection.TestObject3;
 import mappify.collection.except.BadTestObject3;
 import mappify.collection.except.BadTestObject3a;
 import mappify.collection.except.BadTestObject3b;
+import mappify.enums.TestMappableEnum;
+import mappify.enums.TestObject6;
+import mappify.enums.TestUnmappableEnum;
+import mappify.extension.TestChildObject;
+import mappify.extension.TestParentObject;
+import mappify.internal.TestObject4;
 import mappify.map.except.BadTestObject2;
 import mappify.map.except.BadTestObject2a;
 import mappify.map.except.BadTestObject2b;
 import mappify.map.TestObject2;
 import mappify.setter.TestObject5;
 import mappify.setter.except.BadTestObject5;
-import mappify.setter.except.BadTestObject5a;
+import mappify.special.TestSpecialObject;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.opentest4j.AssertionFailedError;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +33,13 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-public class MappifierTester {
+//Unmappifier test modifies static attributes so this must go last (otherwise I have to reset the fields)
+@Order(-298231098)
+public class MappifierTest {
     Mappifier mappifier = Mappifier.DEFAULT;
-
+    {
+        Persist.doC_NAMEScan();
+    }
     @Test
     public void testMappifyPrimitivesAndStaticDifferentiationAndNaming(){
         WrappedObjectMap wom = mappifier.mappify(new TestObject1());
@@ -142,14 +153,52 @@ public class MappifierTester {
     public void testMappifyWithSetterAndGetterMethods(){
         assertThrowsInternal(()->{
             mappifier.mappify(new BadTestObject5());
-        },"Method int0 (with @Save name of int0) overrides a field with the same @Save name. You should remove the @Save annotation on the field.");
-
-        assertThrowsInternal(()->{
-            mappifier.mappify(new BadTestObject5a());
-        },"Method int1 in class mappify.setter.except.BadTestObject5a annotated with @Save is missing a setter method annotated with @Save.Setter(int1)");
+        },"Method int1 in class mappify.setter.except.BadTestObject5 annotated with @Save is missing a setter method annotated with @Save.Setter(int1)");
         WrappedObjectMap wom = mappifier.mappify(new TestObject5());
         testValue(wom,0,"int0");
         testValue(wom,1,"int1");
+    }
+
+    @Test
+    public void testMappifyEnums(){
+        WrappedObjectMap wom = mappifier.mappify(new TestObject6());
+        testValue(wom, TestUnmappableEnum.A,"enum1");
+        testValue(wom, "E","enum2","E_N_");
+        testValue(wom, 0,"enum2","value");
+        int i = 0;
+        for (TestMappableEnum value : TestMappableEnum.values()) {
+            testValue(wom, value.value,"mappableEnumList",i,"value");
+            testValue(wom, value.name(),"mappableEnumList",i,"E_N_");
+            i++;
+        }
+        testValue(wom,"testmappableenum","untypedMappable","C_N_");
+        testValue(wom,"E","untypedMappable","E_N_");
+        testValue(wom,"testunmappableenum","untyped","C_N_");
+        testValue(wom,"A","untyped","E_N_");
+    }
+
+    @Test
+    public void testMappifyExtends(){
+        WrappedObjectMap wom = mappifier.mappify(new TestParentObject());
+        testValue(wom,1,"i");
+        testValue(wom,2,"j");
+        testValue(wom,3,"h");
+        testValue(wom,4,"k");
+
+        wom = mappifier.mappify(new TestChildObject());
+        testValue(wom,1,"i");
+        testValue(wom,2,"j");
+        testValue(wom,10.0,"h");
+        testValue(wom,11.0,"k");
+    }
+
+    @Test
+    public void testMappifyStoreSpecial(){
+        WrappedObjectMap wom = mappifier.mappify(new TestSpecialObject());
+        System.out.println(wom);
+        testValue(wom,"testobjectb","a","C_N_");
+        //testValue(wom,"TestObjectA","a",);
+        testValue(wom,"testobjectc","b","C_N_");
     }
 
     private <T extends Throwable> void assertThrowsInternal(Executable executable, String... messages){
@@ -158,6 +207,7 @@ public class MappifierTester {
             assertEquals(messages[0], "DID NOT THROW");
         } catch (Throwable throwable){
             if(throwable instanceof AssertionFailedError){
+
                 throw (AssertionFailedError)throwable;
             }
             int i = 0;

@@ -140,25 +140,6 @@ public abstract class ParserBase implements IParser {
     protected Object trimValue(String value, AssumedType type) {
         try {
             value = value.trim();
-            if(type == AssumedType.CHAR && value.length() > 3){
-                type = AssumedType.STRING;
-            }
-            if (type == AssumedType.STRING) {
-                if(value.equalsIgnoreCase("null")){
-                    return null;
-                }
-                char f = value.charAt(0);
-                char e = value.charAt(value.length() - 1);
-                if ("'\"".contains("" + f) || "'\"".contains("" + e)) {
-                    return convertFromString(value.substring(1, value.length() - 1),type);
-                }
-            }
-            if(type == AssumedType.CHAR){
-                if(value.isEmpty()){
-                    throw new ParserException("Cannot parse a char due to an empty string.");
-                }
-                return value.length() > 1 ? value.charAt(1) : value.charAt(0);
-            }
             return convertFromString(value,type);
         } catch (Exception e) {
             if(e instanceof ParserException){

@@ -1,12 +1,12 @@
-package mappify;
+package mappify.internal;
 
 import com.vicious.persist.annotations.Save;
 import com.vicious.persist.annotations.Typing;
+import mappify.TestObject1;
 import mappify.collection.TestObject3;
 import mappify.map.TestObject2;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class TestObject4 {

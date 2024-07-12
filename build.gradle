@@ -3,10 +3,13 @@ plugins {
 }
 
 group = 'com.vicious'
-version = '1.0-SNAPSHOT'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://cdn.sussy.tech/repo2/'
+    }
 }
 
 dependencies {

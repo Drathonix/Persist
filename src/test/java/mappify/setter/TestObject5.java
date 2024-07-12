@@ -19,6 +19,6 @@ public class TestObject5 {
 
     @Save.Setter("int1")
     public void setInt1(int value) {
-        int0 = value;
+        int1 = value;
     }
 }

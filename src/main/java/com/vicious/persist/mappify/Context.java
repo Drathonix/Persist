@@ -38,4 +38,12 @@ public class Context {
     public boolean hasMappifiableTraits() {
         return data.hasTraitsInContext(isStatic);
     }
+
+    public void whenPresent(String key, Consumer<FieldData<?>> consumer) {
+        data.whenPresent(key,isStatic,consumer);
+    }
+
+    public boolean hasMappifiableTraits(boolean b) {
+        return data.hasTraitsInContext(b);
+    }
 }

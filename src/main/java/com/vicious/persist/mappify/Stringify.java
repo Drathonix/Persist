@@ -55,6 +55,9 @@ public class Stringify {
         Class<?> cls = obj.getClass();
         Converter<T> converter = (Converter<T>) converters.get(cls);
         if (converter == null) {
+            if(obj instanceof Enum<?>){
+                return ((Enum<?>) obj).name();
+            }
             throw new IllegalArgumentException("No toString converter registered for " + cls);
         }
         else{

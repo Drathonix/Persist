@@ -83,7 +83,7 @@ done
 APP_HOME=$( cd "${APP_HOME:-./}" && pwd -P ) || exit
 
 APP_NAME="Gradle"
-APP_BASE_NAME=${0##*/}
+APP_BASE_N_=${0##*/}
 
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
@@ -200,7 +200,7 @@ fi
 #   * put everything else in single quotes, so that it's not re-expanded.
 
 set -- \
-        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        "-Dorg.gradle.appname=$APP_BASE_N_" \
         -classpath "$CLASSPATH" \
         org.gradle.wrapper.GradleWrapperMain \
         "$@"

@@ -51,6 +51,6 @@ public class WrappedObject {
     @Override
     public String toString() {
         String s = object instanceof String ? "\"" : (object instanceof Character ? "'" : "");
-        return "(" + s + object.toString() + s + ")";
+        return "(" + s + object.toString() + s + ")" + (!comment.isEmpty() ? "[" + comment + "]" : "");
     }
 }
