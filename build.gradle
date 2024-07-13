@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 group = 'com.vicious'
@@ -21,4 +22,30 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+java {
+    withSourcesJar()
+    //withJavadocJar()
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "Persist"
+            url = uri("https://maven.pkg.github.com/Drathonix/Persist")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
+                password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            groupId = "com.vicious"
+            artifactId = 'persist'
+            version = "${version}"
+            from components.java
+        }
+    }
 }
