@@ -120,7 +120,7 @@ public class Mappifier {
             }
             else{
                 if(!valueType.isAssignableFrom(obj.getClass())){
-                    throw new InvalidSavableElementException("Typing does not match Collection generics.");
+                    throw new InvalidSavableElementException("Typing does not match Collection generics. Received object of type " + obj.getClass() + " but expected " + valueType);
                 }
                 out.add(mappifyValue(TypeInfo.cast(info,valueType), obj, raw, typingIndex + 1, null));
             }
@@ -178,10 +178,6 @@ public class Mappifier {
         if(parsedValue == null){
             return null;
         }
-        if(info.getType() == parsedValue.getClass()){
-            return parsedValue;
-        }
-
         if(info.isCollection()){
             return unmappifyCollection(info, (Collection<Object>) Initializers.ensureNotNull(currentValue,info.getType()) ,(Collection<?>) parsedValue, raw, typingIndex);
         }
@@ -203,8 +199,11 @@ public class Mappifier {
             }
         }
 
+        System.out.println("checking ctx");
         if (Context.of(info.getType()).hasMappifiableTraits(info.getType() == Class.class) && !raw) {
+            System.out.println("check!");
             if(parsedValue instanceof Map<?,?>) {
+                System.out.println("success??!");
                 currentValue = Initializers.ensureNotNull(currentValue, info.getType());
                 unmappify(currentValue, (Map<Object, Object>) parsedValue);
                 return currentValue;
@@ -212,6 +211,9 @@ public class Mappifier {
             else{
                 throw new InvalidValueException("Provided value: " + parsedValue + " is not a Map! Cannot unmappify mappifiable object!");
             }
+        }
+        if(info.getType() == parsedValue.getClass()){
+            return parsedValue;
         }
         return Stringify.objectify(info.getType(),parsedValue.toString());
     }

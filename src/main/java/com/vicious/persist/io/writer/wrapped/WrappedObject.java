@@ -15,7 +15,10 @@ public class WrappedObject {
 
     public WrappedObject(Object object, String comment) {
         this.object = object;
-        this.comment = Objects.requireNonNullElse(comment, "");
+        if(comment == null){
+            comment = "";
+        }
+        this.comment = comment;
     }
 
     public static WrappedObject of(Object object) {
