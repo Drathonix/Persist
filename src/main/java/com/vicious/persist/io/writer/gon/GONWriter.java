@@ -107,7 +107,7 @@ public class GONWriter implements IWriter {
     protected void writeValue(Object value, OutputStream out, int depth) throws IOException {
         if(value instanceof Map){
             out.write('{');
-            if(mapEntrySeparator==Separation.NEWLINE) {
+            if(mapEntrySeparator==Separation.NEWLINE && !((Map<?,?>) value).isEmpty()) {
                 out.write('\n');
             }
             write((Map<Object, Object>) value,out,depth+1);
@@ -117,7 +117,7 @@ public class GONWriter implements IWriter {
         }
         if(value instanceof Collection){
             out.write('[');
-            if(listValueSeparator==Separation.NEWLINE) {
+            if(listValueSeparator==Separation.NEWLINE && !((Collection<?>) value).isEmpty()) {
                 out.write('\n');
             }
             writeCollection((Collection<Object>)value,out,depth+1);
