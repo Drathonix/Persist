@@ -27,6 +27,9 @@ public class GONParser extends ParserBase implements IParser {
             if(value.equalsIgnoreCase("null")){
                 return null;
             }
+            if(value.length() < 2){
+                return value;
+            }
             char f = value.charAt(0);
             char e = value.charAt(value.length() - 1);
             if ("'\"".contains("" + f) || "'\"".contains("" + e)) {

@@ -1,14 +1,4 @@
-nested_map_key = {
-	nested_map_key = {
-		nested_map_key = {
-			value = 1
-		}
-	}
-}
-char_key = 'c'
 short_key2 = -2346
-int_key2 = -2165767
-int_key1 = 2165767
 short_key1 = 25346
 list_key = [
 	"value1"
@@ -17,6 +7,43 @@ list_key = [
 	true
 ]
 long_key2 = -2319782317897
+long_key1 = 2319782317897
+emptiness = [
+	[
+	]
+	[
+	]
+	[
+	]
+	[
+	]
+	{
+		k = {
+			v = [
+			]
+		}
+	}
+]
+commented_list = [
+	1
+	2
+	3
+	4
+]
+map_key = {
+	key1 = "hi"
+	key2 = true
+}
+nested_map_key = {
+	nested_map_key = {
+		nested_map_key = {
+			value = 1
+		}
+	}
+}
+char_key = 'c'
+int_key2 = -2165767
+int_key1 = 2165767
 float_key2 = -26423.5
 float_key1 = 26423.5
 nested_list_key = [
@@ -32,22 +59,11 @@ nested_list_key = [
 		]
 	]
 ]
-long_key1 = 2319782317897
 double_key2 = -2.64238797985908E10
 double_key1 = 2.64238797985908E10
 string_key = "value"
 byte_key1 = 127
 byte_key2 = -128
-commented_list = [
-	1
-	2
-	3
-	4
-]
-map_key = {
-	key1 = "hi"
-	key2 = true
-}
 chaos_key = [
 	{
 		internal_map = {
@@ -64,6 +80,7 @@ chaos_key = [
 	}
 ]
 boolean_key4 = false
+emptyString = ""
 boolean_key2 = true
 boolean_key3 = false
 boolean_key1 = true
