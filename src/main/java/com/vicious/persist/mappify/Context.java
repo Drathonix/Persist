@@ -46,8 +46,8 @@ public class Context {
         data.whenPresent(key,isStatic,consumer);
     }
 
-    public boolean hasMappifiableTraits(boolean b) {
-        return data.hasTraitsInContext(b);
+    public boolean hasMappifiableTraits(boolean isStatic) {
+        return data.hasTraitsInContext(isStatic);
     }
 
     public String getPersistentPath() {
