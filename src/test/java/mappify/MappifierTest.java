@@ -125,7 +125,7 @@ public class MappifierTest {
         },"Could not mappify field list in class mappify.collection.except.BadTestObject3a","Typing is of length 1 needs to be at least 2");
         assertThrowsInternal(()->{
             mappifier.mappify(new BadTestObject3b());
-        },"Could not mappify field list in class mappify.collection.except.BadTestObject3b","Typing does not match Collection generics.");
+        },"Could not mappify field list in class mappify.collection.except.BadTestObject3b","Typing does not match Collection generics. Received object of type class java.util.ArrayList but expected class java.lang.String");
         WrappedObjectMap wom = mappifier.mappify(new TestObject3());
         String s ="abcdefghijklmnopqrstuvwxy&z";
         for (int i = 0; i < s.length(); i++) {

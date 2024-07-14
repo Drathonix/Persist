@@ -1,5 +1,6 @@
 package com.vicious.persist.mappify;
 
+import com.vicious.persist.Persist;
 import com.vicious.persist.except.InvalidSavableElementException;
 import com.vicious.persist.except.InvalidValueException;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectList;
@@ -158,9 +159,14 @@ public class Mappifier {
 
     private void unmappify(Context context, Map<Object,Object> map){
         for (Object o : map.keySet()) {
-            context.whenPresent(Stringify.stringify(o),fieldData->{
-                unmappify(fieldData, map.get(o),context);
-            });
+            try {
+                context.whenPresent(Stringify.stringify(o), fieldData -> {
+                    unmappify(fieldData, map.get(o), context);
+                });
+            } catch (Throwable t){
+                System.err.println("Map data: " + map);
+                throw t;
+            }
         }
     }
 
@@ -199,11 +205,8 @@ public class Mappifier {
             }
         }
 
-        System.out.println("checking ctx");
         if (Context.of(info.getType()).hasMappifiableTraits(info.getType() == Class.class) && !raw) {
-            System.out.println("check!");
             if(parsedValue instanceof Map<?,?>) {
-                System.out.println("success??!");
                 currentValue = Initializers.ensureNotNull(currentValue, info.getType());
                 unmappify(currentValue, (Map<Object, Object>) parsedValue);
                 return currentValue;
@@ -224,8 +227,8 @@ public class Mappifier {
         currentValue.clear();
         for (Object key : parsedMap.keySet()) {
             Object val = parsedMap.get(key);
-            currentValue.put(unmappifyValue(TypeInfo.cast(info, keyType), null, raw, key, typingIndex),
-                    unmappifyValue(TypeInfo.cast(info, valueType), null, raw, val, typingIndex));
+            currentValue.put(unmappifyValue(TypeInfo.cast(info, keyType), null, raw, key, typingIndex+2),
+                    unmappifyValue(TypeInfo.cast(info, valueType), null, raw, val, typingIndex+2));
         }
         return currentValue;
     }
