@@ -29,8 +29,6 @@ public interface TypeInfo {
     }
 
     default boolean isCollection(){
-        System.out.println(getType());
-        System.out.println("isCollection: " + Collection.class.isAssignableFrom(getType()));
         return Collection.class.isAssignableFrom(getType());
     }
 
