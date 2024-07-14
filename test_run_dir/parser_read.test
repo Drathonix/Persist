@@ -17,6 +17,17 @@ float_key2= -26423.5
 double_key1 =26423879798.5908
 double_key2 = -26423879798.5908
 
+emptyString = ""
+
+emptiness = [[][
+][
+
+    ]
+        [
+]{k={v=[
+]}
+}]
+
 map_key = {
     key1="hi"
     key2 =true
