@@ -111,7 +111,9 @@ public class GONWriter implements IWriter {
                 out.write('\n');
             }
             write((Map<Object, Object>) value,out,depth+1);
-            tabs(out,tabWidth*depth);
+            if(mapEntrySeparator==Separation.NEWLINE && !((Map<?,?>) value).isEmpty()){
+                tabs(out,tabWidth*depth);
+            }
             out.write('}');
             return;
         }
@@ -121,7 +123,9 @@ public class GONWriter implements IWriter {
                 out.write('\n');
             }
             writeCollection((Collection<Object>)value,out,depth+1);
-            tabs(out,tabWidth*depth);
+            if(listValueSeparator==Separation.NEWLINE && !((Collection<?>) value).isEmpty()){
+                tabs(out,tabWidth*depth);
+            }
             out.write(']');
             return;
         }
