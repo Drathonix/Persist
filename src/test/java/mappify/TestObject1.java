@@ -3,7 +3,7 @@ package mappify;
 import com.vicious.persist.annotations.Save;
 
 public class TestObject1 {
-    @Save
+    @Save(description = "This is a test comment. It is long enough to be multi-line. I am adding some extra comment lore. This comment was written at 3:28 PM on 7/30/2024. It was made to test if comments were written (and ignored properly). 23089231089213089e9dsa90sjisjk432ljk234jads q23e 423jk e dkjsajfejk435ij34234klj234kjdnkasm r32 n23r kdsakklclkdgjkt43jkjkresac")
     public byte byte0 = 120;
 
     @Save
