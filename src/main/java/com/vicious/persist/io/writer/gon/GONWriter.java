@@ -182,13 +182,15 @@ public class GONWriter implements IWriter {
         out.write((lines > 1 ? "/*" : "//").getBytes(StandardCharsets.UTF_8));
         for (int i = 0; i < lines; i++) {
             end = Math.min(comment.length(),(i+1)*commentLineWrap);
-            int j = end >= comment.length() ? comment.length()-1 : end;
-            while (j >= 0) {
-                if(Character.isWhitespace(comment.charAt(j))) {
-                    end=j;
-                    break;
+            if(i < lines-1) {
+                int j = end >= comment.length() ? comment.length() - 1 : end;
+                while (j >= 0) {
+                    if (Character.isWhitespace(comment.charAt(j))) {
+                        end = j;
+                        break;
+                    }
+                    j--;
                 }
-                j--;
             }
             String line = comment.substring(start, end);
             if(i == lines - 1 && lines > 1) {
