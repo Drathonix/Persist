@@ -9,6 +9,8 @@
 	], 
 	"long_key2": -2319782317897, 
 	"long_key1": 2319782317897, 
+	// This is a double-line test comment. Double line data. Cool text. Cool
+	// text 2. Really well written message.
 	"commentedValue3": 1235, 
 	"emptiness": [
 		[], 
@@ -60,8 +62,14 @@
 	"double_key1": 2.64238797985908E10, 
 	"string_key": "value", 
 	"byte_key1": 127, 
+	// This is a single-line test comment.
 	"commentedValue2": 1234, 
 	"byte_key2": -128, 
+	// This is a test comment. It is long enough to be multi-line. I am adding
+	// some extra comment lore. This comment was written at 3:28 PM on
+	// 7/30/2024. It was made to test if comments were written (and ignored properly).
+	// 23089231089213089e9dsa90sjisjk432ljk234jads q23e 423jk e
+	// dkjsajfejk435ij34234klj234kjdnkasm r32 n23r kdsakklclkdgjkt43jkjkresac
 	"commentedValue1": 123, 
 	"chaos_key": [
 		{
