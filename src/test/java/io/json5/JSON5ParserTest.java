@@ -1,4 +1,4 @@
-package io.json;
+package io.json5;
 
 import com.vicious.persist.io.parser.gon.GONParser;
 import io.JSONTesterCore;
@@ -9,9 +9,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Map;
 
-public class JSONParserTest {
+public class JSON5ParserTest {
     @Test
-    public void testJSONParser() {
+    public void testJSON5Parser() {
         try {
             Map<String,Object> map = new GONParser()
                     .autoCastValues(false)

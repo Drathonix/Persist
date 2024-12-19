@@ -36,14 +36,14 @@ public class PersistShortcuts {
 
     public static void readFromFile(Object obj){
         Context context = Context.of(obj);
-        readFromFile(context.getPersistentPathFormat(),obj, context.getPersistentPath(),false);
+        readFromFile(context.getPersistentPathFormat(),obj, context.getPersistentPath(),false,context.getPersistentPathMigrateMode());
     }
 
     @SuppressWarnings({"unchecked","rawtypes"})
-    public static void readFromFile(NotationFormat format, Object obj, String fileName, boolean throwOnNoSuchFile) {
+    public static void readFromFile(NotationFormat format, Object obj, String fileName, boolean throwOnNoSuchFile, boolean migrate) {
         try {
             File file = new File(fileName);
-            if(file.exists() || Migrator.migrate(format, fileName)){
+            if(file.exists() || (migrate && Migrator.migrate(format, fileName))){
                 FileInputStream fis = new FileInputStream(fileName);
                 Map<String,Object> map = format.parse(fis);
                 fis.close();

@@ -152,4 +152,8 @@ public class ClassData {
     public NotationFormat getPersistentPathFormat(Context context) {
         return getPersistentPathAnnotation(context).path.value();
     }
+
+    public boolean getPersistentPathMigrateMode(Context context) {
+        return getPersistentPathAnnotation(context).path.autoMigrate();
+    }
 }

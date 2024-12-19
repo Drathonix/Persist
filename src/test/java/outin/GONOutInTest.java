@@ -205,7 +205,7 @@ public class GONOutInTest {
         List<SearchObj> checks = new ArrayList<>();
         consumer.accept(checks,wom);
         PersistShortcuts.saveAsFile(NotationFormat.GON,wom,"test_run_dir/gon_out_in.test");
-        PersistShortcuts.readFromFile(NotationFormat.GON,target,"test_run_dir/gon_out_in.test",false);
+        PersistShortcuts.readFromFile(NotationFormat.GON,target,"test_run_dir/gon_out_in.test",false,true);
         test(target,checks);
     }
 
