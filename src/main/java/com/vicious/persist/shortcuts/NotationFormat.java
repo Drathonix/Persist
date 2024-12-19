@@ -7,19 +7,26 @@ import com.vicious.persist.io.writer.gon.GONWriter;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public enum NotationFormat {
-    GON(GONWriter.DEFAULT, GONParser.DEFAULT){
-    };
+    GON(GONWriter.DEFAULT, GONParser.DEFAULT,".txt",".gon"),
+    JSON(GONWriter.UGLY, GONParser.DEFAULT,"json"),
+    JSON5(GONWriter.JSON5, GONParser.DEFAULT,"json5");
 
     private final IWriter writer;
     private final IParser parser;
+    private final Set<String> validExtensions;
 
-    NotationFormat(IWriter writer, IParser parser) {
-
+    NotationFormat(IWriter writer, IParser parser, String... validExtensions) {
         this.writer = writer;
         this.parser = parser;
+        for (String validExtension : validExtensions) {
+            
+        }
     }
 
     @SuppressWarnings("unchecked")

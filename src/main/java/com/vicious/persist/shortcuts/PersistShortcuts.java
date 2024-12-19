@@ -43,7 +43,7 @@ public class PersistShortcuts {
     public static void readFromFile(NotationFormat format, Object obj, String fileName, boolean throwOnNoSuchFile) {
         try {
             File file = new File(fileName);
-            if(file.exists()){
+            if(file.exists() || Migrator.migrate(format, fileName)){
                 FileInputStream fis = new FileInputStream(fileName);
                 Map<String,Object> map = format.parse(fis);
                 fis.close();

@@ -1,5 +1,6 @@
 package com.vicious.persist.io.writer.gon;
 
+import com.vicious.persist.io.writer.Separation;
 import com.vicious.persist.mappify.registry.Stringify;
 import com.vicious.persist.except.WriterException;
 import com.vicious.persist.io.writer.wrapped.WrappedObject;
@@ -10,24 +11,116 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GONWriter implements IWriter {
     public static final GONWriter DEFAULT = new GONWriter();
+    public static final GONWriter PRETTY_JSON = new GONWriter()
+            .quoteStrings(true)
+            .quoteChars(true)
+            .quoteNames(true)
+            .charQuote('"')
+            .nameValueSeparator(':')
+            .includeMapBrackets(true)
+            .writeComments(false)
+            .equalsEntryPadding(0)
+            .alwaysWriteCommaBetweenEntries(true);
+    public static final GONWriter UGLY = new GONWriter(PRETTY_JSON)
+            .useListValueSeparator(Separation.COMMA)
+            .useMapEntrySeparator(Separation.COMMA)
+            .putEndingBracketsOnNewline(false);
+
+    public static final GONWriter JSON5 = new GONWriter(PRETTY_JSON)
+            .writeComments(true)
+            .useMultilineComments(false);
 
     private Separation listValueSeparator = Separation.NEWLINE;
     private Separation mapEntrySeparator = Separation.NEWLINE;
+    private boolean alwaysWriteCommaBetweenEntries = false;
+    private boolean putEndingBracketsOnNewline = true;
     private int tabWidth = 1;
-    private int equalsPadding = 1;
+    private int equalsExitPadding = 1;
+    private int equalsEntryPadding = 1;
     private int commaPadding = 1;
     private boolean stringsAutomaticallyQuoted = true;
+    private boolean quoteNames = true;
     private boolean charsAutomaticallyQuoted = true;
     private int commentLineWrap = 72;
+    private boolean writeComments = true;
+    private boolean useMultilineComments = true;
+    private char charQuote = '\'';
+    private char nameValueSeparator = '=';
+    private boolean includeMapBrackets = false;
 
     public GONWriter() {}
 
+    public GONWriter(GONWriter original) {
+        this.listValueSeparator=original.listValueSeparator;
+        this.mapEntrySeparator=original.mapEntrySeparator;
+        this.tabWidth=original.tabWidth;
+        this.equalsExitPadding=original.equalsExitPadding;
+        this.commaPadding=original.commaPadding;
+        this.stringsAutomaticallyQuoted=original.stringsAutomaticallyQuoted;
+        this.quoteNames=original.quoteNames;
+        this.charsAutomaticallyQuoted=original.charsAutomaticallyQuoted;
+        this.commentLineWrap=original.commentLineWrap;
+        this.charQuote=original.charQuote;
+        this.nameValueSeparator=original.nameValueSeparator;
+        this.includeMapBrackets=original.includeMapBrackets;
+        this.writeComments=original.writeComments;
+        this.useMultilineComments=original.useMultilineComments;
+        this.putEndingBracketsOnNewline =original.putEndingBracketsOnNewline;
+        this.equalsEntryPadding=original.equalsEntryPadding;
+        this.alwaysWriteCommaBetweenEntries=original.alwaysWriteCommaBetweenEntries;
+    }
+
+    public GONWriter alwaysWriteCommaBetweenEntries(boolean b){
+        this.alwaysWriteCommaBetweenEntries=b;
+        return this;
+    }
+
+    public GONWriter quoteNames(boolean quoteNames){
+        this.quoteNames=quoteNames;
+        return this;
+    }
+    public GONWriter includeMapBrackets(boolean b){
+        this.includeMapBrackets=b;
+        return this;
+    }
+
+    private GONWriter putEndingBracketsOnNewline(boolean b) {
+        this.putEndingBracketsOnNewline=b;
+        return this;
+    }
+
+    public GONWriter useMultilineComments(boolean b){
+        this.useMultilineComments=b;
+        return this;
+    }
+
+    public GONWriter equalsEntryPadding(int a){
+        this.equalsEntryPadding=a;
+        return this;
+    }
+
+    public GONWriter writeComments(boolean b){
+        this.writeComments=b;
+        return this;
+    }
+
     public GONWriter quoteStrings(boolean setting) {
         this.stringsAutomaticallyQuoted=setting;
+        return this;
+    }
+
+    private GONWriter charQuote(char c) {
+        this.charQuote=c;
+        return this;
+    }
+    private GONWriter nameValueSeparator(char c) {
+        this.nameValueSeparator=c;
         return this;
     }
 
@@ -56,8 +149,8 @@ public class GONWriter implements IWriter {
         return this;
     }
 
-    public GONWriter equalsPadding(int padding) {
-        this.equalsPadding = padding;
+    public GONWriter equalsExitPadding(int padding) {
+        this.equalsExitPadding = padding;
         return this;
     }
 
@@ -68,39 +161,63 @@ public class GONWriter implements IWriter {
 
     @Override
     public void write(@NotNull Map<? extends Object, Object> map, @NotNull OutputStream out) {
-        write(map,out,0);
+        if(includeMapBrackets) {
+            try {
+                writeValue(map, out, 0);
+            } catch (IOException e) {
+                throw new WriterException("Failed to write",e);
+            }
+        }
+        else {
+            write(map, out, 0);
+        }
     }
 
     public void write(Map<? extends Object, Object> map, OutputStream out, int depth) {
-        map.forEach((k, v) -> {
+        Iterator<?> keys = map.keySet().iterator();
+        while(keys.hasNext()){
+            Object k = keys.next();
+            Object v = map.get(k);
             try {
                 Object value = WrappedObject.unwrap(v);
-                String comment = WrappedObject.unwrapComment(v);
-                if(!comment.isEmpty()){
-                    writeComment(out,comment,depth);
+                if(writeComments) {
+                    String comment = WrappedObject.unwrapComment(v);
+                    if (!comment.isEmpty()) {
+                        writeComment(out, comment, depth);
+                    }
                 }
                 if(mapEntrySeparator == Separation.COMMA && (value instanceof Collection || value instanceof Map)){
                     out.write('\n');
                 }
                 if(mapEntrySeparator==Separation.NEWLINE || value instanceof Map || value instanceof Collection) {
-                    writeChar(out,'\t',depth*tabWidth);
+                    tabs(out,depth*tabWidth);
                 }
-                out.write(Stringify.stringify(k).getBytes(StandardCharsets.UTF_8));
-                writeChar(out,' ',equalsPadding);
-                out.write('=');
-                writeChar(out,' ',equalsPadding);
+                writeName(k, out);
+                writeChar(out,' ',equalsEntryPadding);
+                out.write(nameValueSeparator);
+                writeChar(out,' ',equalsExitPadding);
                 writeValue(value,out,depth);
-                if(mapEntrySeparator==Separation.NEWLINE || value instanceof Map || value instanceof Collection) {
-                    out.write('\n');
-                }
-                else{
+                if(keys.hasNext() && (mapEntrySeparator == Separation.COMMA || alwaysWriteCommaBetweenEntries)){
                     out.write(',');
                     writeChar(out,' ',commaPadding);
+                }
+                if(mapEntrySeparator==Separation.NEWLINE || value instanceof Map || value instanceof Collection) {
+                    out.write('\n');
                 }
             } catch (IOException e) {
                 throw new WriterException("Failed to write.",e);
             }
-        });
+        };
+    }
+
+    protected void writeName(Object value, OutputStream out) throws IOException {
+        if(quoteNames){
+            out.write('\"');
+        }
+        out.write(Stringify.stringify(value).getBytes(StandardCharsets.UTF_8));
+        if(quoteNames){
+            out.write('\"');
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -138,7 +255,7 @@ public class GONWriter implements IWriter {
             stringifiedObject = "\""+stringifiedObject+"\"";
         }
         if(charsAutomaticallyQuoted && value instanceof Character){
-            stringifiedObject = "'"+stringifiedObject+"'";
+            stringifiedObject = charQuote+stringifiedObject+charQuote;
         }
         out.write(stringifiedObject.getBytes(StandardCharsets.UTF_8));
     }
@@ -148,8 +265,11 @@ public class GONWriter implements IWriter {
     }
 
     private void writeCollection(Collection<Object> collection, OutputStream out, int depth) {
-       collection.forEach(v -> {
+        Iterator<?> values = collection.iterator();
+        while(values.hasNext()){
+            Object v = values.next();
             try {
+
                 Object value = WrappedObject.unwrap(v);
                 String comment = WrappedObject.unwrapComment(v);
                 if(!comment.isEmpty()){
@@ -162,24 +282,28 @@ public class GONWriter implements IWriter {
                     writeChar(out,'\t',depth*tabWidth);
                 }
                 writeValue(value,out,depth);
-                if(listValueSeparator==Separation.NEWLINE) {
-                    out.write('\n');
-                }
-                else{
+                if(values.hasNext() && (listValueSeparator == Separation.COMMA || alwaysWriteCommaBetweenEntries)){
                     out.write(',');
                     writeChar(out,' ',commaPadding);
+                }
+                if(listValueSeparator==Separation.NEWLINE) {
+                    out.write('\n');
                 }
             } catch (IOException e) {
                 throw new WriterException("Failed to write.",e);
             }
-        });
+        };
     }
 
     protected void writeComment(OutputStream out, String comment, int depth) throws IOException {
         int lines = comment.length()/commentLineWrap+1;
         int start = 0;
         int end;
-        out.write((lines > 1 ? "/*" : "//").getBytes(StandardCharsets.UTF_8));
+        tabs(out,depth*tabWidth);
+        boolean isMultiLine = useMultilineComments && lines > 1;
+        if(isMultiLine){
+            out.write("/* ".getBytes(StandardCharsets.UTF_8));
+        }
         for (int i = 0; i < lines; i++) {
             end = Math.min(comment.length(),(i+1)*commentLineWrap);
             if(i < lines-1) {
@@ -193,13 +317,20 @@ public class GONWriter implements IWriter {
                 }
             }
             String line = comment.substring(start, end);
-            if(i == lines - 1 && lines > 1) {
+            if(i == lines - 1 && isMultiLine) {
                 line += "*/";
-
             }
             start = end;
-            writeChar(out,'\t',depth*tabWidth);
-            out.write(line.getBytes(StandardCharsets.UTF_8));
+            if(i > 0) {
+                tabs(out, depth * tabWidth);
+            }
+            if(!isMultiLine){
+                out.write("// ".getBytes(StandardCharsets.UTF_8));
+            }
+            else if(i > 0){
+                out.write(" * ".getBytes(StandardCharsets.UTF_8));
+            }
+            out.write(line.trim().getBytes(StandardCharsets.UTF_8));
             out.write('\n');
         }
     }

@@ -1,4 +1,4 @@
-package com.vicious.persist.io.writer.gon;
+package com.vicious.persist.io.writer;
 
 public enum Separation {
     COMMA,

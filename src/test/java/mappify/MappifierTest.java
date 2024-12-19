@@ -8,6 +8,7 @@ import mappify.collection.TestObject3;
 import mappify.collection.except.BadTestObject3;
 import mappify.collection.except.BadTestObject3a;
 import mappify.collection.except.BadTestObject3b;
+import mappify.enums.TestEnumsAsKeysObject;
 import mappify.enums.TestMappableEnum;
 import mappify.enums.TestObject6;
 import mappify.enums.TestUnmappableEnum;
@@ -20,7 +21,9 @@ import mappify.map.except.BadTestObject2b;
 import mappify.map.TestObject2;
 import mappify.setter.TestObject5;
 import mappify.setter.except.BadTestObject5;
+import mappify.special.TestObjectWeirdKeys;
 import mappify.special.TestSpecialObject;
+import mappify.special.WeirdKey;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -195,10 +198,25 @@ public class MappifierTest {
     @Test
     public void testMappifyStoreSpecial(){
         WrappedObjectMap wom = mappifier.mappify(new TestSpecialObject());
-        System.out.println(wom);
         testValue(wom,"testobjectb","a","C_N_");
         //testValue(wom,"TestObjectA","a",);
         testValue(wom,"testobjectc","b","C_N_");
+    }
+
+    @Test
+    public void testMappifyEnumsAsKeys(){
+        WrappedObjectMap wom = mappifier.mappify(new TestEnumsAsKeysObject());
+        testValue(wom,TestMappableEnum.H,"map",TestMappableEnum.G);
+        testValue(wom,TestMappableEnum.F,"map",TestMappableEnum.E);
+    }
+
+    @Test
+    public void testMappifyWeirdKeys(){
+        WrappedObjectMap wom = mappifier.mappify(new TestObjectWeirdKeys());
+        System.out.println(wom);
+        testValue(wom, new WeirdKey("sweared"),"map",new WeirdKey("weird"));
+        testValue(wom, new WeirdKey("smeared"),"map",new WeirdKey("beard"));
+        testValue(wom, new WeirdKey("feared"),"map",new WeirdKey("shear"));
     }
 
     private <T extends Throwable> void assertThrowsInternal(Executable executable, String... messages){

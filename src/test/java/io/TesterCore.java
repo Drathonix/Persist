@@ -1,4 +1,4 @@
-package io.gon;
+package io;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,6 +8,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TesterCore {
     public static void parser_read_test_file(Map<String,Object> map) {
+        /*System.out.println("Keys: ");
+        for (String s : map.keySet()) {
+            System.out.println(s);
+            System.out.println("----");
+        }
+        System.out.println("Values: ");
+        for (Object s : map.values()) {
+            System.out.println(s);
+        }
+        System.out.println("Mapped:");*/
         System.out.println(map);
         checkElement("value",map,"string_key");
         checkElement("c",map,"char_key");

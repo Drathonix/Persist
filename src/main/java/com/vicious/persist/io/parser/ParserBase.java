@@ -22,6 +22,13 @@ public abstract class ParserBase implements IParser {
     public Map<String, Object> mappify(TokenView tokenView) {
         setup(tokenView);
         try {
+            //Skip the JSON map start.
+            if(tokenView.isSafe() && tokenView.getNextToken() == '{'){
+                tokenView.read();
+                if(tokenView.isSafe()) {
+                    tokenView.read();
+                }
+            }
             Map<String, Object> map = new HashMap<>();
             while(view.isSafe()){
                 if(!skipIrrelevantData()){
@@ -75,7 +82,7 @@ public abstract class ParserBase implements IParser {
                         return false;
                     }
                     //Found a real character.
-                    if(!(isWhitespace(c) || c == '=' || c == ',' || isNewline(c))){
+                    if(!(isWhitespace(c) || c == ':' || c == '=' || c == ',' || isNewline(c))){
                         return true;
                     }
                 }
@@ -96,7 +103,7 @@ public abstract class ParserBase implements IParser {
                     key.append(getCurrentToken());
                 }
                 else{
-                    return key.toString().trim();
+                    return unquote(key.toString().trim());
                 }
                 view.read();
             }
@@ -104,6 +111,13 @@ public abstract class ParserBase implements IParser {
         } catch (IOException e) {
             throw new ParserException("Failed to read key due to an error.",e);
         }
+    }
+
+    private String unquote(String str) {
+        if(str.startsWith("\"") && str.endsWith("\"")){
+            return str.substring(1, str.length()-1);
+        }
+        return str;
     }
 
     protected Object readValue() {

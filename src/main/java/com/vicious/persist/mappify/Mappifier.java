@@ -76,18 +76,23 @@ public class Mappifier {
             if(value instanceof Enum){
                 map.put(Reserved.E_NAME,WrappedObject.of(((Enum<?>)value).name()));
             }
-            if(value.getClass() != info.getType()){
+            Class<?> trueClass = value instanceof Enum ? ((Enum<?>) value).getDeclaringClass() : value.getClass();
+            if(trueClass != info.getType()){
                 map.put(Reserved.C_NAME, WrappedObject.of(ClassToName.getName(value.getClass(),forceC_NAME)));
             }
             return WrappedObject.of(map,comment);
         }
         else{
-            if(value instanceof Enum && value.getClass() != info.getType()){
+            Class<?> trueClass = value instanceof Enum ? ((Enum<?>) value).getDeclaringClass() : value.getClass();
+            if(value instanceof Enum && trueClass != info.getType()){
                 WrappedObjectMap map = new WrappedObjectMap();
                 map.put(Reserved.E_NAME,WrappedObject.of(((Enum<?>)value).name()));
                 map.put(Reserved.C_NAME, WrappedObject.of(ClassToName.getName(value.getClass(),forceC_NAME)));
                 return WrappedObject.of(map,comment);
             }
+           // else if(value instanceof Enum){
+            //    return WrappedObject.of(((Enum<?>)value).name(),comment);
+            //}
             else {
                 return WrappedObject.of(value, comment);
             }
@@ -190,7 +195,10 @@ public class Mappifier {
         else if(info.isMap()){
             return unmappifyMap(info, (Map<Object,Object>) Initializers.ensureNotNull(currentValue,info.getType()), (Map<?,?>) parsedValue, raw,typingIndex);
         }
-
+        //Force return the custom reconstructor deserializer
+        if(Initializers.useCustomReconstructor(info.getType())) {
+            return Initializers.construct((Map<Object,Object>)parsedValue,info.getType());
+        }
         if(parsedValue instanceof Map<?,?>) {
             Map<?, ?> map = (Map<?, ?>) parsedValue;
             //Change target type to the appropriate type and obtain enum instances.
@@ -198,13 +206,17 @@ public class Mappifier {
                 info = TypeInfo.cast(info, ClassToName.get(map.get(Reserved.C_NAME).toString()));
             }
             if (map.containsKey(Reserved.E_NAME)) {
-                currentValue = Enum.valueOf((Class) info.getType(), map.get(Reserved.E_NAME).toString());
+                if(!info.getType().isEnum() && info.getType().getSuperclass().isEnum()) {
+                    currentValue = Enum.valueOf((Class) info.getType().getSuperclass(), map.get(Reserved.E_NAME).toString());
+                }
+                else {
+                    currentValue = Enum.valueOf((Class) info.getType(), map.get(Reserved.E_NAME).toString());
+                }
             }
             else{
                 currentValue = Initializers.enforce(info.getType(),currentValue);
             }
         }
-
         if (Context.of(info.getType()).hasMappifiableTraits(info.getType() == Class.class) && !raw) {
             if(parsedValue instanceof Map<?,?>) {
                 currentValue = Initializers.ensureNotNull(currentValue, info.getType());

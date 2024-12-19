@@ -1,20 +1,4 @@
-nestedMap = {
-	0 = {
-		hi = '7'
-		yo = 'y'
-		not_present = '0'
-		bye = '8'
-	}
-	1 = {
-		jake = 'j'
-		mike = 'm'
-		cake = 'c'
-	}
-	2 = {
-		isle = 'i'
-		pile = 'p'
-		cake = 'k'
-		not_present = 'u'
-		rifle = 'r'
-	}
+"map" = {
+	""G"" = "G"
+	""E"" = "E"
 }

@@ -8,6 +8,7 @@ import com.vicious.persist.mappify.Context;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
+import java.util.Arrays;
 
 public class FieldData<T extends AccessibleObject & Member> implements TypeInfo {
     public final T getterElement;
@@ -94,5 +95,14 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
             throw new InvalidSavableElementException("missing @Typing annotation!");
         }
         return typing.value();
+    }
+
+    @Override
+    public String toString() {
+        return "FieldData{" +
+                ", saveData=" + saveData +
+                ", rangeData=" + rangeData +
+                ", typing=" + typing +
+                '}';
     }
 }

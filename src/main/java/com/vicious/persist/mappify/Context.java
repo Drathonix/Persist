@@ -12,12 +12,14 @@ public class Context {
 
     public final Class<?> type;
     public final boolean isStatic;
+    public final boolean isEnum;
     public final Object source;
     public final ClassData data;
 
     protected Context(Object source){
         this.isStatic = source instanceof Class<?>;
-        this.type = isStatic ? (Class<?>)source : source.getClass();
+        this.isEnum = source instanceof Enum<?>;
+        this.type = isEnum ? ((Enum<?>) source).getDeclaringClass() : isStatic ? (Class<?>)source : source.getClass();
         this.source=source;
         this.data = getClassData(this);
     }
