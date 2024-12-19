@@ -211,11 +211,16 @@ public class GONWriter implements IWriter {
     }
 
     protected void writeName(Object value, OutputStream out) throws IOException {
-        if(quoteNames){
+        boolean insertQuotes = quoteNames;
+        String str = Stringify.stringify(value);
+        if(insertQuotes){
+            insertQuotes = !str.endsWith("\"") && !str.startsWith("\"");
+        }
+        if(insertQuotes){
             out.write('\"');
         }
         out.write(Stringify.stringify(value).getBytes(StandardCharsets.UTF_8));
-        if(quoteNames){
+        if(insertQuotes){
             out.write('\"');
         }
     }
@@ -251,7 +256,8 @@ public class GONWriter implements IWriter {
             return;
         }
         String stringifiedObject = Stringify.stringify(value);
-        if(stringsAutomaticallyQuoted && value instanceof String){
+        if(stringsAutomaticallyQuoted && value instanceof String &&
+                !stringifiedObject.startsWith("\"") && !stringifiedObject.endsWith("\"")){
             stringifiedObject = "\""+stringifiedObject+"\"";
         }
         if(charsAutomaticallyQuoted && value instanceof Character){
