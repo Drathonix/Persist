@@ -1,0 +1,85 @@
+{
+    "string_key": "value",
+    "char_key": "c",
+    "boolean_key1": true,
+    "boolean_key2": True,
+    "boolean_key3": False,
+    "boolean_key4": faLsE,
+    "byte_key1": 127,
+    "byte_key2": -128,
+    "short_key1": 25346,
+    "short_key2": -2346,
+    "int_key1": 2165767,
+    "int_key2": -2165767,
+    "long_key1": 2319782317897,
+    "long_key2": -2319782317897,
+    "float_key1": 26423.5,
+    "float_key2": -26423.5,
+    "double_key1": 26423879798.5908,
+    "double_key2": -26423879798.5908,
+    "emptyString": "",
+    "emptiness": [
+        [],
+        [
+        ],
+        [],
+        [],
+        {
+            "k": {
+                "v": []
+            }
+        }
+    ],
+
+    "map_key": {
+        "key1": "hi",
+        "key2": true
+    },
+
+    "nested_map_key": {
+        "nested_map_key": {
+            "nested_map_key": {
+                "value": 1
+            }
+        }
+    },
+    "list_key": [
+        "value1",
+        1,
+        5,
+        true
+    ],
+    "nested_list_key": [
+        [
+            [
+                [
+                    [
+                        1,
+                        2,
+                        3
+                    ]
+                ]
+            ]
+        ]
+    ],
+    "chaos_key": [
+        {
+            "internal_map": {
+                "list": [
+                    [
+                        {
+                            "key": "value"
+                        },
+                        {}
+                    ]
+                ]
+            }
+        }
+    ],
+    "commented_list": [
+        1,
+        2,
+        3,
+        4
+    ]
+}

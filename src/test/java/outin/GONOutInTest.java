@@ -8,6 +8,7 @@ import com.vicious.persist.shortcuts.NotationFormat;
 import com.vicious.persist.shortcuts.PersistShortcuts;
 import mappify.TestObject1;
 import mappify.collection.TestObject3;
+import mappify.enums.TestEnumsAsKeysObject;
 import mappify.enums.TestMappableEnum;
 import mappify.enums.TestObject6;
 import mappify.enums.TestUnmappableEnum;
@@ -16,7 +17,9 @@ import mappify.extension.TestParentObject;
 import mappify.internal.TestObject4;
 import mappify.map.TestObject2;
 import mappify.setter.TestObject5;
+import mappify.special.TestObjectWeirdKeys;
 import mappify.special.TestSpecialObject;
+import mappify.special.WeirdKey;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -178,6 +181,24 @@ public class GONOutInTest {
             out.add(genEdit(wom,'9',"b","char"));
         });
     }
+
+    @Test
+    public void testMappifyEnumsAsKeys(){
+        genEditsAndTest(new TestEnumsAsKeysObject(), (out, wom) -> {
+            out.add(genEdit(wom,TestMappableEnum.G,"map",TestMappableEnum.G));
+            out.add(genEdit(wom,TestMappableEnum.E,"map",TestMappableEnum.E));
+        });
+    }
+
+    @Test
+    public void testMappifyWeirdKeys(){
+        genEditsAndTest(new TestObjectWeirdKeys(),(out, wom)->{
+            out.add(genEdit(wom,new WeirdKey("apple"),"map",new WeirdKey("weird")));
+            out.add(genEdit(wom,new WeirdKey("banana"),"map",new WeirdKey("beard")));
+            out.add(genEdit(wom,new WeirdKey("orange"),"map",new WeirdKey("shear")));
+        });
+    }
+
 
     private void genEditsAndTest(Object target, BiConsumer<List<SearchObj>, WrappedObjectMap> consumer) {
         WrappedObjectMap wom = mappifier.mappify(target);

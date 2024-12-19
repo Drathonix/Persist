@@ -71,6 +71,9 @@ public class Stringify {
             return null;
         }
         if(cls.isEnum()){
+            if(str.startsWith("\"") && str.endsWith("\"")){
+                str = str.substring(1,str.length()-1);
+            }
             return (T)Enum.valueOf((Class)cls,str);
         }
         Converter<T> converter = (Converter<T>) converters.get(cls);

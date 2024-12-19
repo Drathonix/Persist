@@ -48,5 +48,23 @@ public class TokenView {
         return (int)tokens[2] != 0;
     }
 
-
+    @Override
+    public String toString() {
+        StringBuilder out = new StringBuilder("[");
+        for (int i = 0; i < tokens.length; i++) {
+            char c = tokens[i];
+            String name;
+            if(Character.isLetterOrDigit(c)){
+                name=""+c;
+            }
+            else{
+                name = Character.getName(c);
+            }
+            out.append(name);
+            if(i != tokens.length-1){
+                out.append(',');
+            }
+        }
+        return out + "]";
+    }
 }

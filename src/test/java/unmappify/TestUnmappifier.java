@@ -9,6 +9,7 @@ import mappify.collection.TestObject3;
 import mappify.collection.except.BadTestObject3;
 import mappify.collection.except.BadTestObject3a;
 import mappify.collection.except.BadTestObject3b;
+import mappify.enums.TestEnumsAsKeysObject;
 import mappify.enums.TestMappableEnum;
 import mappify.enums.TestObject6;
 import mappify.enums.TestUnmappableEnum;
@@ -21,7 +22,9 @@ import mappify.map.except.BadTestObject2a;
 import mappify.map.except.BadTestObject2b;
 import mappify.setter.TestObject5;
 import mappify.setter.except.BadTestObject5;
+import mappify.special.TestObjectWeirdKeys;
 import mappify.special.TestSpecialObject;
+import mappify.special.WeirdKey;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -159,7 +162,7 @@ public class TestUnmappifier {
     }
 
     @Test
-    public void testMappifyExtends(){
+    public void testUnmappifyExtends(){
         genEditsAndTest(new TestParentObject(), (out, wom) -> {
             out.add(genEdit(wom,4,"i"));
             out.add(genEdit(wom,5,"j"));
@@ -176,11 +179,28 @@ public class TestUnmappifier {
     }
 
     @Test
-    public void testMappifyStoreSpecial(){
+    public void testUnmappifyStoreSpecial(){
         genEditsAndTest(new TestSpecialObject(), (out, wom) -> {
             modifyValue(wom,"testobjecta","a","C_N_");
             out.add(genEdit(wom,"TestObjectAInjected","a","name"));
             out.add(genEdit(wom,'9',"b","char"));
+        });
+    }
+
+    @Test
+    public void testUnmappifyEnumsAsKeys(){
+        genEditsAndTest(new TestEnumsAsKeysObject(), (out, wom) -> {
+            out.add(genEdit(wom,TestMappableEnum.G,"map",TestMappableEnum.G));
+            out.add(genEdit(wom,TestMappableEnum.E,"map",TestMappableEnum.E));
+        });
+    }
+
+    @Test
+    public void testUnmappifyWeirdKeys(){
+        genEditsAndTest(new TestObjectWeirdKeys(),(out,wom)->{
+            out.add(genEdit(wom,new WeirdKey("apple"),"map",new WeirdKey("weird")));
+            out.add(genEdit(wom,new WeirdKey("banana"),"map",new WeirdKey("beard")));
+            out.add(genEdit(wom,new WeirdKey("orange"),"map",new WeirdKey("shear")));
         });
     }
 

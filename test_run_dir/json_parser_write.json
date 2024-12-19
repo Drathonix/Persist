@@ -1,0 +1,33 @@
+{
+	"short_key2": ": -2346", 
+	"short_key1": ": 25346", 
+	"long_key2": ": -2319782317897", 
+	"long_key1": ": 2319782317897", 
+	"commentedValue3": 1235, 
+	"emptiness": ": [", 
+	"char_key": " "c", 
+	"int_key2": ": -2165767", 
+	"int_key1": ": 2165767", 
+	"float_key2": ": -26423.5", 
+	"[],
+        [
+        ],
+        [],
+        [],
+        {
+            "k"": ": {", 
+	"float_key1": ": 26423.5", 
+	"double_key2": ": -26423879798.5908", 
+	"double_key1": ": 26423879798.5908", 
+	"string_key": " "value", 
+	"byte_key1": ": 127", 
+	"commentedValue2": 1234, 
+	"byte_key2": ": -128", 
+	"commentedValue1": 123, 
+	"v": ": [", 
+	"boolean_key4": ": false", 
+	"emptyString": "", 
+	"boolean_key2": ": true", 
+	"boolean_key3": ": false", 
+	"boolean_key1": ": true"
+}

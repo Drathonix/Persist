@@ -3,6 +3,7 @@ package com.vicious.persist.mappify.reflect;
 import com.vicious.persist.except.InvalidSavableElementException;
 import com.vicious.persist.mappify.registry.Stringify;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -17,6 +18,11 @@ public interface TypeInfo {
             @Override
             public Class<?>[] getTyping() {
                 return info.getTyping();
+            }
+
+            @Override
+            public String toString() {
+                return "CastedInfo{"+ valueType + ", " + Arrays.toString(info.getTyping()) + "}";
             }
         };
     }
