@@ -7,26 +7,30 @@ import com.vicious.persist.io.writer.gon.GONWriter;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public enum NotationFormat {
     GON(GONWriter.DEFAULT, GONParser.DEFAULT,".txt",".gon"),
     JSON(GONWriter.UGLY, GONParser.DEFAULT,"json"),
     JSON5(GONWriter.JSON5, GONParser.DEFAULT,"json5");
 
-    private final IWriter writer;
-    private final IParser parser;
-    private final Set<String> validExtensions;
+    public final IWriter writer;
+    public final IParser parser;
+    private final Set<String> validExtensions = new HashSet<>();
 
     NotationFormat(IWriter writer, IParser parser, String... validExtensions) {
         this.writer = writer;
         this.parser = parser;
+        this.validExtensions.addAll(Arrays.asList(validExtensions));
+    }
+
+    public boolean isValidFile(String file){
         for (String validExtension : validExtensions) {
-            
+            if(file.endsWith(validExtension)){
+                return true;
+            }
         }
+        return false;
     }
 
     @SuppressWarnings("unchecked")

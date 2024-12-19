@@ -59,4 +59,8 @@ public class Context {
     public NotationFormat getPersistentPathFormat() {
         return data.getPersistentPathFormat(this);
     }
+
+    public boolean getPersistentPathMigrateMode() {
+        return data.getPersistentPathMigrateMode(this);
+    }
 }
