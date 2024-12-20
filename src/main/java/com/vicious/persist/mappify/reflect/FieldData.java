@@ -8,12 +8,13 @@ import com.vicious.persist.mappify.Context;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
-import java.util.Arrays;
 
 public class FieldData<T extends AccessibleObject & Member> implements TypeInfo {
     public final T getterElement;
     public final Save saveData;
+    @Nullable
     public final Range rangeData;
+    @Nullable
     public final Typing typing;
     public final Method setter;
 
@@ -54,11 +55,37 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
 
     public void set(Context context, Object value) {
         try {
-            if(setter != null) {
-                setter.invoke(context.source,value);
+            if(rangeData != null && value instanceof Number){
+                double v = ((Number)value).doubleValue();
+                if(v < rangeData.minimum()){
+                    v = Math.max(v,rangeData.minimum());
+                }
+                else if (v > rangeData.maximum()){
+                    v = Math.min(v,rangeData.maximum());
+                }
+                if(value instanceof Double) {
+                    value = v;
+                }
+                else if(value instanceof Float){
+                    value = (float)v;
+                }
+                else if(value instanceof Byte){
+                    value = (byte)v;
+                }
+                else if(value instanceof Short){
+                    value = (short)v;
+                }
+                else if(value instanceof Integer){
+                    value = (int)v;
+                }
+                else if(value instanceof Long){
+                    value = (long)v;
+                }
             }
-            else if(getterElement instanceof Field) {
-                ((Field) getterElement).set(context.source,value);
+            if (setter != null) {
+                setter.invoke(context.source, value);
+            } else if (getterElement instanceof Field) {
+                ((Field) getterElement).set(context.source, value);
             }
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Cannot access field ",e);

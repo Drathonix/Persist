@@ -10,11 +10,11 @@ public class Stringify {
 
     static {
         //noinspection unchecked
-        register(Byte::parseByte, Object::toString, byte.class, Byte.class);
+        register(Stringify::clampedParseByte, Object::toString, byte.class, Byte.class);
         //noinspection unchecked
-        register(Short::parseShort, Object::toString, short.class, Short.class);
+        register(Stringify::clampedParseShort, Object::toString, short.class, Short.class);
         //noinspection unchecked
-        register(Integer::parseInt, Object::toString, int.class, Integer.class);
+        register(Stringify::clampedParseInt, Object::toString, int.class, Integer.class);
         //noinspection unchecked
         register(Long::parseLong, Object::toString, long.class, Long.class);
         //noinspection unchecked
@@ -36,6 +36,22 @@ public class Stringify {
         }, Class::getName);
 
     }
+
+    private static byte clampedParseByte(String str){
+        return (byte)Math.clamp(Long.parseLong(str), Byte.MIN_VALUE, Byte.MAX_VALUE);
+    }
+
+    private static short clampedParseShort(String str){
+        return (short)Math.clamp(Long.parseLong(str), Short.MIN_VALUE, Short.MAX_VALUE);
+    }
+
+    private static int clampedParseInt(String str){
+        return Math.clamp(Long.parseLong(str), Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+
+   /*private static float clampedParseFloat(String str){
+        return (float) Math.clamp(Float.parseFloat(str), Float.MIN_VALUE, Float.MAX_VALUE);
+    }*/
 
     private static <E,T extends E> void register(Function<String,T> stringToObject, Function<T,String> objectToString, Class<T>... classes) {
         for (Class<T> aClass : classes) {
