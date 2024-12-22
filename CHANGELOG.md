@@ -5,3 +5,5 @@
 # 1.2.1 - Avoid saving strings with multiple sets of quotes.
 
 # 1.2.2 - Made @Range actually clamp number fields to the marked range. Also put safeguards in for integer overflow when parsing.
+
+# 1.2.3 - Non-int and non-bool stringifiable objects will be quoted when saved.

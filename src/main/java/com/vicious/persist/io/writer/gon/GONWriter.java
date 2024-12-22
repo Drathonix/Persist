@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GONWriter implements IWriter {
     public static final GONWriter DEFAULT = new GONWriter();
@@ -256,14 +255,16 @@ public class GONWriter implements IWriter {
             return;
         }
         String stringifiedObject = Stringify.stringify(value);
-        if(stringsAutomaticallyQuoted && value instanceof String &&
-                !stringifiedObject.startsWith("\"") && !stringifiedObject.endsWith("\"")){
+        if(stringsAutomaticallyQuoted && !shouldQuote(value) && !stringifiedObject.startsWith("\"") && !stringifiedObject.endsWith("\"")){
             stringifiedObject = "\""+stringifiedObject+"\"";
         }
         if(charsAutomaticallyQuoted && value instanceof Character){
             stringifiedObject = charQuote+stringifiedObject+charQuote;
         }
         out.write(stringifiedObject.getBytes(StandardCharsets.UTF_8));
+    }
+    private boolean shouldQuote(Object object){
+        return object instanceof Number || object instanceof Boolean || object instanceof Character;
     }
 
     private void tabs(OutputStream out, int n) throws IOException {
