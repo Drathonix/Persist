@@ -1,0 +1,12 @@
+modLoader="javafml"
+loaderVersion="*"
+license="MIT"
+issueTrackerURL="https://github.com/Drathonix/Persist/issues"
+[[mods]]
+modId="persist"
+version="1.2.3"
+displayName="Persist"
+authors="Drathonix"
+description='''
+A config parser.
+'''
