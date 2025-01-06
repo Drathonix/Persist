@@ -14,8 +14,14 @@ import com.vicious.persist.mappify.registry.Stringify;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * A generic Mappifier utility that is able to covert objects to and from maps using Reflection.
+ * @author Jack Andersen
+ * @since 1.0
+ */
 public class Mappifier {
     public static final Mappifier DEFAULT = new Mappifier();
 
@@ -27,16 +33,33 @@ public class Mappifier {
     private boolean forceC_NAME = false;
     private Mappifier(){}
 
+    /**
+     * Builder method that configures the mappifier to mark reserved fields with warning comments.
+     * Defaults to false.
+     * @param setting the setting.
+     * @return self
+     */
     public Mappifier applyCommentsOnReservedFields(boolean setting){
         this.applyCommentsOnReservedFields = setting;
         return this;
     }
-
+    /**
+     * Builder method that configures the mappifier to require that all class names saved to have a {@link com.vicious.persist.annotations.C_NAME} present and registered beforehand.
+     * If a C_NAME annotation is not present the class will be saved using the java canonical name.
+     * Defaults to false.
+     * @param setting the setting.
+     * @return self
+     */
     public Mappifier forceC_NAME(boolean setting){
         this.forceC_NAME = setting;
         return this;
     }
 
+    /**
+     * Converts an object into a WrappedObjectMap using its relevant Fields marked with {@link com.vicious.persist.annotations.Save}
+     * @param object the object to mappify.
+     * @return the object's map representation.
+     */
     public WrappedObjectMap mappify(Object object){
         return mappify(Context.of(object));
     }
@@ -46,6 +69,9 @@ public class Mappifier {
         context.forEach(fieldData -> {
             output.put(fieldData.getName(),mappify(fieldData, context, fieldData.isRaw()));
         });
+        if(context.hasTransformations()) {
+            output.put(Reserved.TRANSFORMER_VER, WrappedObject.of(context.getTransformerVer(),reservedComment()));
+        }
         return output;
     }
 
@@ -70,7 +96,6 @@ public class Mappifier {
         else if(info.isMap()){
             return WrappedObject.of(mappifyMap(info, (Map<?,?>) value,raw,typingIndex),comment);
         }
-
         if(Context.of(value).hasMappifiableTraits()){
             WrappedObjectMap map = mappify(value);
             if(value instanceof Enum){
@@ -151,28 +176,39 @@ public class Mappifier {
     }
 
 
-
-
-
+    /**
+     * Writes a map's values to an objects Fields marked with {@link com.vicious.persist.annotations.Save}
+     * @param writeTarget the object to write to.
+     * @param map the map to take data from.
+     */
     public void unmappify(Object writeTarget, WrappedObjectMap map){
         this.unmappify(writeTarget,map.unwrap());
     }
 
+    /**
+     * Writes a map's values to an objects Fields marked with {@link com.vicious.persist.annotations.Save}
+     * @param writeTarget the object to write to.
+     * @param map the map to take data from.
+     */
     public void unmappify(Object writeTarget, Map<Object,Object> map){
         unmappify(Context.of(writeTarget),map);
     }
 
+
     private void unmappify(Context context, Map<Object,Object> map){
+        if(context.hasTransformations()){
+            context.transform(map);
+        }
         for (Object o : map.keySet()) {
             try {
                 context.whenPresent(Stringify.stringify(o), fieldData -> {
                     unmappify(fieldData, map.get(o), context);
                 });
-            } catch (Throwable t){
-                System.err.println("Map data: " + map);
+            } catch (Throwable t) {
                 throw t;
             }
         }
+
     }
 
     private void unmappify(FieldData<?> data, Object parsedValue, Context context) {

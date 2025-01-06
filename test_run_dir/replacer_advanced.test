@@ -1,0 +1,12 @@
+{
+	"otherInner": {
+		"inner2": {
+			"k": 1
+		}
+	}, 
+	"inner": {
+		"inner2": {
+			"k": 1
+		}
+	}
+}
