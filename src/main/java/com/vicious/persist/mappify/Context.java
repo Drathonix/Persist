@@ -10,6 +10,7 @@ import com.vicious.persist.shortcuts.NotationFormat;
 import com.vicious.persist.util.ClassMap;
 import com.vicious.persist.util.StringTree;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,10 @@ public class Context {
      */
     public final boolean isEnum;
     /**
+     * Whether the source object is an array instance.
+     */
+    public final boolean isArray;
+    /**
      * The source object that the context applies to.
      */
     public final Object source;
@@ -52,6 +57,7 @@ public class Context {
     protected Context(Object source){
         this.isStatic = source instanceof Class<?>;
         this.isEnum = source instanceof Enum<?>;
+        this.isArray = source instanceof Array;
         this.type = isEnum ? ((Enum<?>) source).getDeclaringClass() : isStatic ? (Class<?>)source : source.getClass();
         this.source=source;
         this.data = getClassData(this);
@@ -138,5 +144,9 @@ public class Context {
 
     public int getTransformerVer() {
         return data.getTransformerVer();
+    }
+
+    public FieldData<?> getField(String targetField) {
+        return data.getField(targetField);
     }
 }

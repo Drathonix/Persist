@@ -11,8 +11,10 @@ import com.vicious.persist.mappify.reflect.TypeInfo;
 import com.vicious.persist.mappify.registry.Initializers;
 import com.vicious.persist.mappify.registry.Reserved;
 import com.vicious.persist.mappify.registry.Stringify;
+import com.vicious.persist.util.Boxing;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -96,6 +98,9 @@ public class Mappifier {
         else if(info.isMap()){
             return WrappedObject.of(mappifyMap(info, (Map<?,?>) value,raw,typingIndex),comment);
         }
+        else if(info.isArray()){
+            return WrappedObject.of(mappifyArray(info,value, raw, typingIndex), comment);
+        }
         if(Context.of(value).hasMappifiableTraits()){
             WrappedObjectMap map = mappify(value);
             if(value instanceof Enum){
@@ -152,6 +157,25 @@ public class Mappifier {
             else{
                 if(!valueType.isAssignableFrom(obj.getClass())){
                     throw new InvalidSavableElementException("Typing does not match Collection generics. Received object of type " + obj.getClass() + " but expected " + valueType);
+                }
+                out.add(mappifyValue(TypeInfo.cast(info,valueType), obj, raw, typingIndex + 1, null));
+            }
+        }
+        return out;
+    }
+
+    private WrappedObjectList mappifyArray(TypeInfo info, Object array, boolean raw, int typingIndex) {
+        Class<?> valueType = info.getTyping(typingIndex);
+        WrappedObjectList out = new WrappedObjectList();
+        int len = Array.getLength(array);
+        for (int i = 0; i < len; i++) {
+            Object obj = Array.get(array,i);
+            if(obj == null){
+                out.add(WrappedObject.nullified());
+            }
+            else{
+                if(!Boxing.requireObjective(valueType).isAssignableFrom(obj.getClass())){
+                    throw new InvalidSavableElementException("Typing does not match Array types. Received object of type " + obj.getClass() + " but expected " + valueType);
                 }
                 out.add(mappifyValue(TypeInfo.cast(info,valueType), obj, raw, typingIndex + 1, null));
             }
@@ -231,6 +255,9 @@ public class Mappifier {
         else if(info.isMap()){
             return unmappifyMap(info, (Map<Object,Object>) Initializers.ensureNotNull(currentValue,info.getType()), (Map<?,?>) parsedValue, raw,typingIndex);
         }
+        else if(info.isArray()){
+            return unmappifyArray(info, (Collection<?>)parsedValue, raw, typingIndex);
+        }
         //Force return the custom reconstructor deserializer
         if(Initializers.useCustomReconstructor(info.getType())) {
             return Initializers.construct((Map<Object,Object>)parsedValue,info.getType());
@@ -288,5 +315,16 @@ public class Mappifier {
             currentValue.add(unmappifyValue(TypeInfo.cast(info,valueType),null, raw, obj,typingIndex+1));
         }
         return currentValue;
+    }
+
+    private Object unmappifyArray(TypeInfo info, Collection<?> parsedCollection, boolean raw, int typingIndex) {
+        Class<?> valueType = info.getTyping(typingIndex);
+        Object arrayOut = Array.newInstance(valueType, parsedCollection.size());
+        int i = 0;
+        for (Object obj : parsedCollection) {
+            Boxing.arraySet(arrayOut,i,unmappifyValue(TypeInfo.cast(info,valueType),null,raw,obj,typingIndex+1));
+            i++;
+        }
+        return arrayOut;
     }
 }

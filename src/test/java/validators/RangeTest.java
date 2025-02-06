@@ -1,4 +1,4 @@
-package rangetester;
+package validators;
 
 import com.vicious.persist.annotations.PersistentPath;
 import com.vicious.persist.annotations.Range;
