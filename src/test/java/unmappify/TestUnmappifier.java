@@ -5,6 +5,7 @@ import com.vicious.persist.io.writer.wrapped.WrappedObject;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectMap;
 import com.vicious.persist.mappify.Mappifier;
 import mappify.TestObject1;
+import mappify.array.ArrayTestObject;
 import mappify.collection.TestObject3;
 import mappify.collection.except.BadTestObject3;
 import mappify.collection.except.BadTestObject3a;
@@ -201,6 +202,15 @@ public class TestUnmappifier {
             out.add(genEdit(wom,new WeirdKey("apple"),"map",new WeirdKey("weird")));
             out.add(genEdit(wom,new WeirdKey("banana"),"map",new WeirdKey("beard")));
             out.add(genEdit(wom,new WeirdKey("orange"),"map",new WeirdKey("shear")));
+        });
+    }
+
+    @Test
+    public void testMappifyArrays(){
+        genEditsAndTest(ArrayTestObject.class,(out,wom)->{
+            out.add(genEdit(wom,ArrayTestObject.ints[3],"ints",3));
+            out.add(genEdit(wom,ArrayTestObject.nestedBool[1][1],"nestedBool",1,1));
+            out.add(genEdit(wom,ArrayTestObject.doubleNestedDoubles[1][0][1],"doubleNestedDoubles",1,0,1));
         });
     }
 

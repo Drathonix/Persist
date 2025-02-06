@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.vicious'
-version = '21-1.2.4'
+version = '21-1.3.0'
 
 repositories {
     mavenCentral()
