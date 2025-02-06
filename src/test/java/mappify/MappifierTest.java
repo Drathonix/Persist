@@ -4,6 +4,7 @@ import com.vicious.persist.Persist;
 import com.vicious.persist.io.writer.wrapped.WrappedObject;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectMap;
 import com.vicious.persist.mappify.Mappifier;
+import mappify.array.ArrayTestObject;
 import mappify.collection.TestObject3;
 import mappify.collection.except.BadTestObject3;
 import mappify.collection.except.BadTestObject3a;
@@ -213,10 +214,17 @@ public class MappifierTest {
     @Test
     public void testMappifyWeirdKeys(){
         WrappedObjectMap wom = mappifier.mappify(new TestObjectWeirdKeys());
-        System.out.println(wom);
         testValue(wom, new WeirdKey("sweared"),"map",new WeirdKey("weird"));
         testValue(wom, new WeirdKey("smeared"),"map",new WeirdKey("beard"));
         testValue(wom, new WeirdKey("feared"),"map",new WeirdKey("shear"));
+    }
+
+    @Test
+    public void testMappifyArrays(){
+        WrappedObjectMap wom = mappifier.mappify(ArrayTestObject.class);
+        testValue(wom,ArrayTestObject.ints[3],"ints",3);
+        testValue(wom,ArrayTestObject.nestedBool[1][1],"nestedBool",1,1);
+        testValue(wom,ArrayTestObject.doubleNestedDoubles[1][0][1],"doubleNestedDoubles",1,0,1);
     }
 
     private <T extends Throwable> void assertThrowsInternal(Executable executable, String... messages){

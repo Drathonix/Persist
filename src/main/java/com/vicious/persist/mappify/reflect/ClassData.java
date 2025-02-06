@@ -358,4 +358,8 @@ public class ClassData {
         }
         return out.toString();
     }
+
+    public FieldData<?> getField(String targetField) {
+        return savableFields.get(targetField);
+    }
 }
