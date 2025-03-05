@@ -39,6 +39,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("all")
+
 /**
  * {@code AnnotationDetector} reads Java Class File (".class") files and reports the
  * encountered annotations via a simple, developer friendly API.
@@ -95,7 +97,7 @@ import java.util.Set;
  * <li><a href="http://community.jboss.org/wiki/MCScanninglib">JBoss MC Scanning lib</a>;
  * <li><a href="http://code.google.com/p/reflections/">Google Reflections</a>, in fact an
  * improved version of <a href="http://scannotation.sourceforge.net/">scannotation</a>;
- * <li><a herf="https://github.com/ngocdaothanh/annovention">annovention</a>, improved version
+ * <li><a href="https://github.com/ngocdaothanh/annovention">annovention</a>, improved version
  * of the <a href="http://code.google.com/p/annovention">original Annovention</a> project.
  * Available from maven: {@code tv.cntt:annovention:1.2};
  * <li>If using the Spring Framework, use {@code ClassPathScanningCandidateComponentProvider}

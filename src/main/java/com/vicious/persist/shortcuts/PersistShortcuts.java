@@ -110,6 +110,8 @@ public class PersistShortcuts {
      * @param target the object that contains the value.
      * @param value the new value to set.
      * @param targetField the name of the field to modify.
+     * @author Jack Andersen
+     * @since 1.3.0
      */
     public static void set(@NotNull Object target, @Nullable Object value, @NotNull String targetField) {
         Context ctx = Context.of(target);

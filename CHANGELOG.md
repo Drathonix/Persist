@@ -11,3 +11,6 @@
 # 1.2.4 - Flexibility and Future-proofing Improvements
 * Added @AltName - Allows granting a savable element multiple names.
 * Added @ReplaceKeys - Allows replacing keys on map read using a path structure.
+# 1.3.0 - Finally learned how to develop for multiple versions of java at the same time :face_palm: (It's been like, 8 years at this point :/)
+Also there's some javadocs now. I'll be slowwwwwwly improving them don't quote me.
+Also readme.md is better now.

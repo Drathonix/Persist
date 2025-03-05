@@ -4,13 +4,10 @@ plugins {
 }
 
 group = 'com.vicious'
-version = '17-1.3.0'
+version = '1.3.0'
 
 repositories {
     mavenCentral()
-    maven {
-        url 'https://cdn.sussy.tech/repo2/'
-    }
 }
 
 dependencies {
@@ -25,8 +22,15 @@ test {
 }
 
 java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
     withSourcesJar()
-    //withJavadocJar()
+    withJavadocJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release.set(8)
 }
 
 publishing {

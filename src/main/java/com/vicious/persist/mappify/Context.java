@@ -54,6 +54,10 @@ public class Context {
      */
     public final ClassData data;
 
+    /**
+     * Creates a context from the source object.
+     * @param source any object.
+     */
     protected Context(Object source){
         this.isStatic = source instanceof Class<?>;
         this.isEnum = source instanceof Enum<?>;
@@ -63,6 +67,10 @@ public class Context {
         this.data = getClassData(this);
     }
 
+    /**
+     * Creates a context from the source object.
+     * @param source any object.
+     */
     public static Context of(Object source){
         return new Context(source);
     }
@@ -110,7 +118,6 @@ public class Context {
     /**
      * Applies key transformations from {@link ReplaceKeys}
      * @param map the map to transform.
-     * @return untransformed key.
      */
     public void transform(Map<Object, Object> map) {
         if(map.containsKey(Reserved.TRANSFORMER_VER) && map.get(Reserved.TRANSFORMER_VER) instanceof Number){

@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
+ * Stores necessary information for Persist's Mappifier.
  * @author Jack Andersen
  * @since 1.0
  */
@@ -314,6 +315,10 @@ public class ClassData {
         return keyTransformations[isStatic ? 1 : 0];
     }
 
+    /**
+     * Gets the transformer version for the class type.
+     * @return an int representing the transformer version.
+     */
     public int getTransformerVer() {
         return transformerVer;
     }
@@ -359,7 +364,12 @@ public class ClassData {
         return out.toString();
     }
 
-    public FieldData<?> getField(String targetField) {
+    /**
+     * Gets a Persist Field instance.
+     * @param targetField the name of the field to retrieve.
+     * @return the target field or null.
+     */
+    public @Nullable FieldData<?> getField(String targetField) {
         return savableFields.get(targetField);
     }
 }

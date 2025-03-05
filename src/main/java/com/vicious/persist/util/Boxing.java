@@ -2,6 +2,11 @@ package com.vicious.persist.util;
 
 import java.lang.reflect.Array;
 
+/**
+ * Handles situations involving auto-unboxable objects and classes.
+ * @author Jack Andersen
+ * @since 1.3.0
+ */
 public class Boxing {
     public static Class<?> requireObjective(Class<?> cls){
         if(cls == boolean.class) {
@@ -32,7 +37,6 @@ public class Boxing {
     }
 
     public static void arraySet(Object arrayOut, int i, Object o) {
-        System.out.println(arrayOut.getClass());
         if(o instanceof Boolean){
             Array.setBoolean(arrayOut,i,(Boolean)o);
         }
