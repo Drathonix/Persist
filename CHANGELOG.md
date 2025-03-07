@@ -14,3 +14,4 @@
 # 1.3.0 - Finally learned how to develop for multiple versions of java at the same time :face_palm: (It's been like, 8 years at this point :/)
 Also there's some javadocs now. I'll be slowwwwwwly improving them don't quote me.
 Also readme.md is better now.
+# 1.3.1 - Added @Required, any field marked with this is required to be present when unmappifying.

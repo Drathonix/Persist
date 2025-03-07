@@ -1,8 +1,8 @@
 package com.vicious.persist.mappify;
 
-import com.vicious.persist.Persist;
 import com.vicious.persist.except.InvalidSavableElementException;
 import com.vicious.persist.except.InvalidValueException;
+import com.vicious.persist.except.NoValuePresentException;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectList;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectMap;
 import com.vicious.persist.io.writer.wrapped.WrappedObject;
@@ -16,8 +16,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A generic Mappifier utility that is able to covert objects to and from maps using Reflection.
@@ -223,16 +224,23 @@ public class Mappifier {
         if(context.hasTransformations()){
             context.transform(map);
         }
+        Set<FieldData<?>> required = context.data.copyRequired();
         for (Object o : map.keySet()) {
             try {
                 context.whenPresent(Stringify.stringify(o), fieldData -> {
                     unmappify(fieldData, map.get(o), context);
+                    if(!required.isEmpty()) {
+                        required.remove(fieldData);
+                    }
                 });
             } catch (Throwable t) {
                 throw t;
             }
         }
-
+        if(!required.isEmpty()){
+            FieldData<?> zero = required.iterator().next();
+            throw new NoValuePresentException("Did not find required value of key " + zero.getName() + " in the provided map!");
+        }
     }
 
     private void unmappify(FieldData<?> data, Object parsedValue, Context context) {

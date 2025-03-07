@@ -14,7 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -43,6 +45,11 @@ public class ClassData {
      * The class transformation version.
      */
     private final int transformerVer;
+
+    /**
+     * Set of all Fields that must be unmapped.
+     */
+    private final Set<FieldData<?>> requiredFields = new HashSet<>();
 
     /**
      * Goes through a class' hierarchy and executes some arbitrary code.
@@ -199,6 +206,11 @@ public class ClassData {
                 }
             }
         });
+        for (FieldData<?> value : savableFields.values()) {
+            if(value.isRequired()){
+                requiredFields.add(value);
+            }
+        }
         transformerVer=tSum.get();
     }
 
@@ -371,5 +383,13 @@ public class ClassData {
      */
     public @Nullable FieldData<?> getField(String targetField) {
         return savableFields.get(targetField);
+    }
+
+    /**
+     * Gets a copy of the class' required fields.
+     * @return all required fields
+     */
+    public Set<FieldData<?>> copyRequired() {
+        return new HashSet<>(requiredFields);
     }
 }

@@ -1,9 +1,6 @@
 package com.vicious.persist.mappify.reflect;
 
-import com.vicious.persist.annotations.CleanString;
-import com.vicious.persist.annotations.Range;
-import com.vicious.persist.annotations.Save;
-import com.vicious.persist.annotations.Typing;
+import com.vicious.persist.annotations.*;
 import com.vicious.persist.except.InvalidSavableElementException;
 import com.vicious.persist.mappify.Context;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +10,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a savable element's annotations and its getter and setter functions.
@@ -57,6 +55,11 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
     @Nullable
     public final Method setter;
 
+    /**
+     * When true this Field must be included in a map when unmapping.
+     */
+    private final boolean required;
+
     public FieldData(T element, @Nullable Method setter) {
         if(element instanceof Method && setter == null) {
             throw new InvalidSavableElementException("Method " + element.getName() + " in " + element.getDeclaringClass() + " annotated with @Save is missing a setter method annotated with @Save.Setter(" + element.getName() + ")");
@@ -97,6 +100,7 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
             }
         }
         this.typing = tempTyping;
+        this.required = element.isAnnotationPresent(Required.class);
     }
 
     public boolean matchesStaticness(boolean isStatic) {
@@ -215,5 +219,27 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
                 ", rangeData=" + range +
                 ", typing=" + typing +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        FieldData<?> fieldData = (FieldData<?>) object;
+        return Objects.equals(getterElement, fieldData.getterElement);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getterElement);
+    }
+
+    /**
+     * Checks if this field must be present when unmapping.
+     * @since 1.3.1
+     * @return whether the field is marked with {@link Required}.
+     */
+    public boolean isRequired() {
+        return required;
     }
 }
