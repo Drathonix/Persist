@@ -15,3 +15,6 @@
 Also there's some javadocs now. I'll be slowwwwwwly improving them don't quote me.
 Also readme.md is better now.
 # 1.3.1 - Added @Required, any field marked with this is required to be present when unmappifying.
+
+# 1.3.2 - Fixed a performance bug with mappify on Fields with @Altname where serialization would be executed an additional time per name. Had no effect on output, just performance problems.
+Added a test for @AltName as well.

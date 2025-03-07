@@ -27,9 +27,16 @@ import java.util.function.Consumer;
  */
 public class ClassData {
     /**
+     * Map of all savable Fields by name or alt name. This is not a BiMap
      * A map of all Fields marked with {@link com.vicious.persist.annotations.Save} by savable name.
      */
-    private final Map<String, FieldData<?>> savableFields = new HashMap<>();
+    private final Map<String, FieldData<?>> nameToField = new HashMap<>();
+
+    /**
+     * Set of all unique Fields present in the class.
+     */
+    private final Set<FieldData<?>> savableFields = new HashSet<>();
+
     /**
      * The Fields marked with {@link com.vicious.persist.annotations.PersistentPath} by context (non-static or static)
      * There can only be a maximum of two.
@@ -86,7 +93,7 @@ public class ClassData {
                     if(Reserved.isReserved(name)){
                         throw new InvalidSavableElementException("Method " + m1.getName() + " in " + m1.getDeclaringClass() + " @Save(\"" + name + "\"), has a reserved name! Use a different name.");
                     }
-                    if(savableFields.containsKey(name)){
+                    if(nameToField.containsKey(name)){
                         continue;
                     }
                     Method setter = null;
@@ -106,12 +113,13 @@ public class ClassData {
                     FieldData<?> data = new FieldData<>(m1,setter);
                     if(altName != null){
                         for (String s : altName.value()) {
-                            if(!savableFields.containsKey(s) && !Reserved.isReserved(s)) {
-                                savableFields.put(s, data);
+                            if(!nameToField.containsKey(s) && !Reserved.isReserved(s)) {
+                                nameToField.put(s, data);
                             }
                         }
                     }
-                    savableFields.put(name, data);
+                    nameToField.put(name, data);
+                    savableFields.add(data);
                 }
                 if(path != null){
                     int idx = Modifier.isStatic(m1.getModifiers()) ? 1 : 0;
@@ -129,7 +137,7 @@ public class ClassData {
                 PersistentPath path = field.getAnnotation(PersistentPath.class);
                 if(save != null){
                     String name = save.value().isEmpty() ? field.getName() : save.value();
-                    if(savableFields.containsKey(name)){
+                    if(nameToField.containsKey(name)){
                         continue;
                     }
                     if(Reserved.isReserved(name)){
@@ -149,12 +157,13 @@ public class ClassData {
                     FieldData<?> data = new FieldData<>(field,setter);
                     if(altName != null){
                         for (String s : altName.value()) {
-                            if(!savableFields.containsKey(s) && !Reserved.isReserved(s)) {
-                                savableFields.put(s, data);
+                            if(!nameToField.containsKey(s) && !Reserved.isReserved(s)) {
+                                nameToField.put(s, data);
                             }
                         }
                     }
-                    savableFields.put(name, data);
+                    nameToField.put(name, data);
+                    savableFields.add(data);
                 }
                 if(path != null){
                     int idx = Modifier.isStatic(field.getModifiers()) ? 1 : 0;
@@ -206,7 +215,7 @@ public class ClassData {
                 }
             }
         });
-        for (FieldData<?> value : savableFields.values()) {
+        for (FieldData<?> value : savableFields) {
             if(value.isRequired()){
                 requiredFields.add(value);
             }
@@ -229,7 +238,7 @@ public class ClassData {
      * @param accessor some arbitrary code to run on the {@link com.vicious.persist.mappify.reflect.FieldData} instance.
      */
     public void forEach(boolean isStatic, Consumer<FieldData<?>> accessor){
-        savableFields.forEach((name, field) -> {
+        savableFields.forEach(field -> {
             if(field.matchesStaticness(isStatic)) {
                 accessor.accept(field);
             }
@@ -242,7 +251,7 @@ public class ClassData {
      * @return if savable fields exist for the static context.
      */
     public boolean hasTraitsInContext(boolean isStatic) {
-        for (FieldData<?> value : savableFields.values()) {
+        for (FieldData<?> value : savableFields) {
             if(value.matchesStaticness(isStatic)) {
                 return true;
             }
@@ -257,7 +266,7 @@ public class ClassData {
      * @param consumer some arbitrary code.
      */
     public void whenPresent(String key, boolean isStatic, Consumer<FieldData<?>> consumer) {
-        FieldData<?> field = savableFields.get(key);
+        FieldData<?> field = nameToField.get(key);
         if(field != null && field.matchesStaticness(isStatic)) {
             consumer.accept(field);
         }
@@ -346,7 +355,7 @@ public class ClassData {
                 out.append("\tCan Migrate: ").append(getPersistentPathMigrateMode(Context.of(Class.class))).append("\n");
             } catch (Throwable ignored){}
             out.append("\tSavable Elements: {\n");
-            savableFields.forEach((name, field) -> {
+            nameToField.forEach((name, field) -> {
                 if(field.matchesStaticness(true)) {
                     out.append("\t\t").append(name).append(": ").append(field.getType()).append("\n");
                 }
@@ -364,7 +373,7 @@ public class ClassData {
                 out.append("\tCan Migrate: ").append(getPersistentPathMigrateMode(Context.of(1))).append("\n");
             } catch (Throwable ignored){}
             out.append("\tSavable Elements: {\n");
-            savableFields.forEach((name, field) -> {
+            nameToField.forEach((name, field) -> {
                 if(field.matchesStaticness(false)) {
                     out.append("\t\t").append(name).append(": ").append(field.getType()).append("\n");
                 }
@@ -382,7 +391,7 @@ public class ClassData {
      * @return the target field or null.
      */
     public @Nullable FieldData<?> getField(String targetField) {
-        return savableFields.get(targetField);
+        return nameToField.get(targetField);
     }
 
     /**
