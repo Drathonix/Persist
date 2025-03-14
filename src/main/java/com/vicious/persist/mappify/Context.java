@@ -1,13 +1,11 @@
 package com.vicious.persist.mappify;
 
 import com.vicious.persist.annotations.ReplaceKeys;
-import com.vicious.persist.io.writer.wrapped.WrappedObject;
 import com.vicious.persist.mappify.reflect.ClassData;
 import com.vicious.persist.mappify.reflect.FieldData;
 import com.vicious.persist.mappify.registry.Reserved;
 import com.vicious.persist.mappify.registry.Stringify;
 import com.vicious.persist.shortcuts.NotationFormat;
-import com.vicious.persist.util.ClassMap;
 import com.vicious.persist.util.StringTree;
 
 import java.lang.reflect.Array;
@@ -27,7 +25,6 @@ import java.util.function.Consumer;
  * @since 1.0
  */
 public class Context {
-    private static final ClassMap<ClassData> classData = new ClassMap<>();
     /**
      * True if the source is a {@link java.lang.Class} instance.
      */
@@ -64,7 +61,7 @@ public class Context {
         this.isArray = source instanceof Array;
         this.type = isEnum ? ((Enum<?>) source).getDeclaringClass() : isStatic ? (Class<?>)source : source.getClass();
         this.source=source;
-        this.data = getClassData(this);
+        this.data = ClassData.getClassData(this.type);
     }
 
     /**
@@ -73,10 +70,6 @@ public class Context {
      */
     public static Context of(Object source){
         return new Context(source);
-    }
-
-    public static synchronized ClassData getClassData(Context context) {
-        return classData.computeIfAbsent(context.getType(), ClassData::new);
     }
 
     public Class<?> getType(){

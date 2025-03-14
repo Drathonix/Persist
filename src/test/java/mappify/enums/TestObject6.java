@@ -1,5 +1,6 @@
 package mappify.enums;
 
+import com.vicious.persist.annotations.Objectified;
 import com.vicious.persist.annotations.Save;
 import com.vicious.persist.annotations.Typing;
 
@@ -23,6 +24,7 @@ public class TestObject6 {
 
     @Save
     @Typing(TestMappableEnum.class)
+    @Objectified
     public List<TestMappableEnum> mappableEnumList = new ArrayList<>();
 
     {

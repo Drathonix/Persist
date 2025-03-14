@@ -59,6 +59,11 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
      * When true this Field must be included in a map when unmapping.
      */
     private final boolean required;
+    /**
+     * When true enums will be stored in Object format rather than in Reference format.
+     */
+    private final boolean objectified;
+
 
     public FieldData(T element, @Nullable Method setter) {
         if(element instanceof Method && setter == null) {
@@ -101,6 +106,7 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
         }
         this.typing = tempTyping;
         this.required = element.isAnnotationPresent(Required.class);
+        this.objectified = element.isAnnotationPresent(Objectified.class);
     }
 
     public boolean matchesStaticness(boolean isStatic) {
@@ -190,8 +196,8 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
         return getterElement.getName();
     }
 
-    public boolean isRaw() {
-        return saveData.raw();
+    public boolean objectified() {
+        return objectified;
     }
 
     @Override

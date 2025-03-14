@@ -167,8 +167,8 @@ public class MappifierTest {
     public void testMappifyEnums(){
         WrappedObjectMap wom = mappifier.mappify(new TestObject6());
         testValue(wom, TestUnmappableEnum.A,"enum1");
-        testValue(wom, "E","enum2","E_N_");
-        testValue(wom, 0,"enum2","value");
+        testValue(wom, TestMappableEnum.E,"enum2");
+        //testValue(wom, 0,"enum2","value");
         int i = 0;
         for (TestMappableEnum value : TestMappableEnum.values()) {
             testValue(wom, value.value,"mappableEnumList",i,"value");

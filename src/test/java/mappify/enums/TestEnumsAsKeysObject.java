@@ -7,8 +7,8 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public class TestEnumsAsKeysObject {
-    @Save(raw = true)
     @Typing({TestMappableEnum.class,TestMappableEnum.class})
+    @Save
     public Map<TestMappableEnum,TestMappableEnum> map = new EnumMap<>(TestMappableEnum.class);
 
     {

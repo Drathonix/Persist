@@ -9,14 +9,14 @@ import com.vicious.persist.except.InvalidSavableElementException;
 import com.vicious.persist.mappify.Context;
 import com.vicious.persist.mappify.registry.Reserved;
 import com.vicious.persist.shortcuts.NotationFormat;
+import com.vicious.persist.util.ClassMap;
+import com.vicious.persist.util.ReflectionHelper;
 import com.vicious.persist.util.StringTree;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -26,16 +26,17 @@ import java.util.function.Consumer;
  * @since 1.0
  */
 public class ClassData {
+    private static final ClassMap<ClassData> classData = new ClassMap<>();
     /**
      * Map of all savable Fields by name or alt name. This is not a BiMap
      * A map of all Fields marked with {@link com.vicious.persist.annotations.Save} by savable name.
      */
-    private final Map<String, FieldData<?>> nameToField = new HashMap<>();
+    private final Map<String, FieldData<?>> nameToField = new LinkedHashMap<>();
 
     /**
      * Set of all unique Fields present in the class.
      */
-    private final Set<FieldData<?>> savableFields = new HashSet<>();
+    private final Set<FieldData<?>> savableFields = new LinkedHashSet<>();
 
     /**
      * The Fields marked with {@link com.vicious.persist.annotations.PersistentPath} by context (non-static or static)
@@ -56,22 +57,7 @@ public class ClassData {
     /**
      * Set of all Fields that must be unmapped.
      */
-    private final Set<FieldData<?>> requiredFields = new HashSet<>();
-
-    /**
-     * Goes through a class' hierarchy and executes some arbitrary code.
-     * @param cls the child class
-     * @param consumer the code to execute on that class' hierarchy
-     */
-    private static void forEach(Class<?> cls, Consumer<Class<?>> consumer){
-        if(cls != null){
-            consumer.accept(cls);
-            for (Class<?> anInterface : cls.getInterfaces()) {
-                consumer.accept(anInterface);
-            }
-            forEach(cls.getSuperclass(), consumer);
-        }
-    }
+    private final Set<FieldData<?>> requiredFields = new LinkedHashSet<>();
 
     /**
      * Initializes the savableFields and persistentPath reference maps.
@@ -81,7 +67,7 @@ public class ClassData {
      */
     public ClassData(Class<?> c){
         AtomicInteger tSum = new AtomicInteger(0);
-        forEach(c,cls->{
+        ReflectionHelper.forEach(c, cls->{
             for (Method m1 : cls.getDeclaredMethods()) {
                 Save save = m1.getAnnotation(Save.class);
                 PersistentPath path = m1.getAnnotation(PersistentPath.class);
@@ -221,6 +207,29 @@ public class ClassData {
             }
         }
         transformerVer=tSum.get();
+    }
+
+    /**
+     * Gets the class data for an arbitrary object.
+     * @param object the object, can be a class object or an instance.
+     * @return the object's class data.
+     */
+    public static @NotNull ClassData getClassData(@NotNull Object object){
+        if(object instanceof Class<?>){
+            return getClassData((Class<?>)object);
+        }
+        else{
+            return getClassData(object.getClass());
+        }
+    }
+
+    /**
+     * Gets the class data for a specific class.
+     * @param type the class to use.
+     * @return A ClassData object.
+     */
+    public static synchronized @NotNull ClassData getClassData(Class<?> type) {
+        return classData.computeIfAbsent(type, ClassData::new);
     }
 
     /**
@@ -394,6 +403,20 @@ public class ClassData {
         return nameToField.get(targetField);
     }
 
+    /**
+     * Gets all the keys for the field provided
+     * @param field the field to search for.
+     * @return a Set containing 0 or more keys for the field.
+     */
+    public @NotNull Set<String> getKeysOfField(@NotNull FieldData<?> field){
+        Set<String> keys = new HashSet<>();
+        for (Map.Entry<String, FieldData<?>> entry : nameToField.entrySet()) {
+            if(entry.getValue() == field){
+                keys.add(entry.getKey());
+            }
+        }
+        return keys;
+    }
     /**
      * Gets a copy of the class' required fields.
      * @return all required fields

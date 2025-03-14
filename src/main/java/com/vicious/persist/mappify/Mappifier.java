@@ -16,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,104 +27,120 @@ import java.util.Set;
 public class Mappifier {
     public static final Mappifier DEFAULT = new Mappifier();
 
-    public static Mappifier create(){
+    public static Mappifier create() {
         return new Mappifier();
     }
 
     private boolean applyCommentsOnReservedFields = false;
     private boolean forceC_NAME = false;
-    private Mappifier(){}
+
+    private Mappifier() {
+    }
 
     /**
      * Builder method that configures the mappifier to mark reserved fields with warning comments.
      * Defaults to false.
+     *
      * @param setting the setting.
      * @return self
      */
-    public Mappifier applyCommentsOnReservedFields(boolean setting){
+    public Mappifier applyCommentsOnReservedFields(boolean setting) {
         this.applyCommentsOnReservedFields = setting;
         return this;
     }
+
     /**
      * Builder method that configures the mappifier to require that all class names saved to have a {@link com.vicious.persist.annotations.C_NAME} present and registered beforehand.
      * If a C_NAME annotation is not present the class will be saved using the java canonical name.
      * Defaults to false.
+     *
      * @param setting the setting.
      * @return self
      */
-    public Mappifier forceC_NAME(boolean setting){
+    public Mappifier forceC_NAME(boolean setting) {
         this.forceC_NAME = setting;
         return this;
     }
 
     /**
      * Converts an object into a WrappedObjectMap using its relevant Fields marked with {@link com.vicious.persist.annotations.Save}
+     *
      * @param object the object to mappify.
      * @return the object's map representation.
      */
-    public WrappedObjectMap mappify(Object object){
+    public WrappedObjectMap mappify(Object object) {
         return mappify(Context.of(object));
     }
 
     private WrappedObjectMap mappify(Context context) {
         WrappedObjectMap output = new WrappedObjectMap();
         context.forEach(fieldData -> {
-            output.put(fieldData.getName(),mappify(fieldData, context, fieldData.isRaw()));
+            output.put(fieldData.getName(), mappify(fieldData, context, fieldData.objectified()));
         });
-        if(context.hasTransformations()) {
-            output.put(Reserved.TRANSFORMER_VER, WrappedObject.of(context.getTransformerVer(),reservedComment()));
+        if (context.hasTransformations()) {
+            output.put(Reserved.TRANSFORMER_VER, WrappedObject.of(context.getTransformerVer(), reservedComment()));
         }
         return output;
     }
 
-    private WrappedObject mappify(FieldData<?> data, Context context, boolean raw) {
+    private WrappedObject mappify(FieldData<?> data, Context context, boolean objectifyStatics) {
         try {
-            return mappifyValue(data, data.get(context), raw,0, data.saveData.description());
-        } catch (Throwable t){
-            throw new InvalidSavableElementException("Could not mappify field " + data.getFieldName() + " in " + context.getType(),t);
+            return mappifyValue(data, data.get(context), objectifyStatics, 0, data.saveData.description());
+        } catch (Throwable t) {
+            throw new InvalidSavableElementException("Could not mappify field " + data.getFieldName() + " in " + context.getType(), t);
         }
     }
 
-    private WrappedObject mappifyValue(TypeInfo info, Object value, boolean raw, int typingIndex, String comment){
-        if(value == null || raw && !info.isDataStructure()){
-            return WrappedObject.of(value,comment);
+    private WrappedObject mappifyValue(TypeInfo info, Object value, boolean objectifyStatics, int typingIndex, String comment) {
+        if (value == null) {
+            return WrappedObject.of(value, comment);
         }
-        if(info.isClass()){
-            return WrappedObject.of(mappifyClass(info,value,raw),comment);
+        else if (shouldStoreAsReference(value, objectifyStatics)) {
+            return mappifyAsReference(info, value, comment);
         }
-        else if(info.isCollection()){
-            return WrappedObject.of(mappifyCollection(info, (Collection<?>) value,raw,typingIndex),comment);
-        }
-        else if(info.isMap()){
-            return WrappedObject.of(mappifyMap(info, (Map<?,?>) value,raw,typingIndex),comment);
-        }
-        else if(info.isArray()){
-            return WrappedObject.of(mappifyArray(info,value, raw, typingIndex), comment);
-        }
-        if(Context.of(value).hasMappifiableTraits()){
+        else if (Context.of(value).hasMappifiableTraits()) {
             WrappedObjectMap map = mappify(value);
-            if(value instanceof Enum){
-                map.put(Reserved.E_NAME,WrappedObject.of(((Enum<?>)value).name()));
+            if (value instanceof Enum) {
+                map.put(Reserved.E_NAME, WrappedObject.of(((Enum<?>) value).name()));
             }
-            Class<?> trueClass = value instanceof Enum ? ((Enum<?>) value).getDeclaringClass() : value.getClass();
-            if(trueClass != info.getType()){
-                map.put(Reserved.C_NAME, WrappedObject.of(ClassToName.getName(value.getClass(),forceC_NAME)));
+            Class<?> trueClass = value.getClass();
+            if (trueClass != info.getType()) {
+                map.put(Reserved.C_NAME, WrappedObject.of(ClassToName.getName(value.getClass(), forceC_NAME)));
             }
-            return WrappedObject.of(map,comment);
+            return WrappedObject.of(map, comment);
         }
-        else{
-            Class<?> trueClass = value instanceof Enum ? ((Enum<?>) value).getDeclaringClass() : value.getClass();
-            if(value instanceof Enum && trueClass != info.getType()){
+        else if (info.isCollection()) {
+            return WrappedObject.of(mappifyCollection(info, (Collection<?>) value, objectifyStatics, typingIndex), comment);
+        } else if (info.isMap()) {
+            return WrappedObject.of(mappifyMap(info, (Map<?, ?>) value, objectifyStatics, typingIndex), comment);
+        } else if (info.isArray()) {
+            return WrappedObject.of(mappifyArray(info, value, objectifyStatics, typingIndex), comment);
+        }
+        else {
+            return WrappedObject.of(value, comment);
+        }
+    }
+
+    private WrappedObject mappifyAsReference(TypeInfo info, Object value, String comment) {
+        if (value instanceof Class) {
+            if (info.getType() == Class.class) {
+                return WrappedObject.of(ClassToName.getName((Class<?>) value, forceC_NAME), comment);
+            } else {
                 WrappedObjectMap map = new WrappedObjectMap();
-                map.put(Reserved.E_NAME,WrappedObject.of(((Enum<?>)value).name()));
-                map.put(Reserved.C_NAME, WrappedObject.of(ClassToName.getName(value.getClass(),forceC_NAME)));
-                return WrappedObject.of(map,comment);
+                map.put(Reserved.C_NAME, WrappedObject.of(ClassToName.getName(value.getClass(), forceC_NAME)));
+                return WrappedObject.of(map, comment);
             }
-           // else if(value instanceof Enum){
-            //    return WrappedObject.of(((Enum<?>)value).name(),comment);
-            //}
-            else {
+        }
+        // Will always be enum.
+        else {
+            if(info.getType() == ((Enum<?>) value).getDeclaringClass()) {
                 return WrappedObject.of(value, comment);
+            }
+            else{
+                WrappedObjectMap map = new WrappedObjectMap();
+                map.put(Reserved.C_NAME, WrappedObject.of(ClassToName.getName(value.getClass(), forceC_NAME)));
+                map.put(Reserved.E_NAME, WrappedObject.of(((Enum<?>) value).name()));
+                return WrappedObject.of(map,comment);
             }
         }
     }
@@ -245,7 +260,7 @@ public class Mappifier {
 
     private void unmappify(FieldData<?> data, Object parsedValue, Context context) {
         try {
-            Object unmapped = unmappifyValue(data, data.get(context), data.isRaw(), parsedValue,0);
+            Object unmapped = unmappifyValue(data, data.get(context), data.objectified(), parsedValue,0);
             data.set(context,unmapped);
         } catch (Throwable t){
             throw new InvalidSavableElementException("Could not unmappify field " + data.getFieldName() + " in " + context.getType(),t);
@@ -253,53 +268,58 @@ public class Mappifier {
     }
 
     @SuppressWarnings({"unchecked","rawtypes"})
-    private Object unmappifyValue(TypeInfo info, @Nullable Object currentValue, boolean raw, Object parsedValue, int typingIndex){
+    private Object unmappifyValue(TypeInfo info, @Nullable Object currentValue, boolean objectifyStatics, Object parsedValue, int typingIndex){
         if(parsedValue == null){
             return null;
         }
-        if(info.isCollection()){
-            return unmappifyCollection(info, (Collection<Object>) Initializers.ensureNotNull(currentValue,info.getType()) ,(Collection<?>) parsedValue, raw, typingIndex);
-        }
-        else if(info.isMap()){
-            return unmappifyMap(info, (Map<Object,Object>) Initializers.ensureNotNull(currentValue,info.getType()), (Map<?,?>) parsedValue, raw,typingIndex);
-        }
-        else if(info.isArray()){
-            return unmappifyArray(info, (Collection<?>)parsedValue, raw, typingIndex);
-        }
-        //Force return the custom reconstructor deserializer
-        if(Initializers.useCustomReconstructor(info.getType())) {
-            return Initializers.construct((Map<Object,Object>)parsedValue,info.getType());
-        }
-        if(parsedValue instanceof Map<?,?>) {
-            Map<?, ?> map = (Map<?, ?>) parsedValue;
-            //Change target type to the appropriate type and obtain enum instances.
-            if (map.containsKey(Reserved.C_NAME)) {
-                info = TypeInfo.cast(info, ClassToName.get(map.get(Reserved.C_NAME).toString()));
-            }
-            if (map.containsKey(Reserved.E_NAME)) {
-                if(!info.getType().isEnum() && info.getType().getSuperclass().isEnum()) {
-                    currentValue = Enum.valueOf((Class) info.getType().getSuperclass(), map.get(Reserved.E_NAME).toString());
-                }
-                else {
-                    currentValue = Enum.valueOf((Class) info.getType(), map.get(Reserved.E_NAME).toString());
-                }
-            }
-            else{
-                currentValue = Initializers.enforce(info.getType(),currentValue);
-            }
-        }
-        if (Context.of(info.getType()).hasMappifiableTraits(info.getType() == Class.class) && !raw) {
-            if(parsedValue instanceof Map<?,?>) {
-                currentValue = Initializers.ensureNotNull(currentValue, info.getType());
-                unmappify(currentValue, (Map<Object, Object>) parsedValue);
-                return currentValue;
-            }
-            else{
-                throw new InvalidValueException("Provided value: " + parsedValue + " is not a Map! Cannot unmappify mappifiable object!");
-            }
-        }
         if(info.getType() == parsedValue.getClass()){
             return parsedValue;
+        }
+        else if(parsedValue instanceof Collection){
+            if(info.isCollection()){
+                return unmappifyCollection(info, (Collection<Object>) Initializers.ensureNotNull(currentValue,info.getType()) ,(Collection<?>) parsedValue, objectifyStatics, typingIndex);
+            }
+            else if(info.isArray()){
+                return unmappifyArray(info, (Collection<?>)parsedValue, objectifyStatics, typingIndex);
+            }
+            else{
+                throw new InvalidValueException("Parsed value is a Collection but the expected type is of " + info.getType() + " which cannot be converted to from a collection.");
+            }
+        }
+        else if(parsedValue instanceof Map){
+            if(info.isMap()){
+                return unmappifyMap(info, (Map<Object,Object>) Initializers.ensureNotNull(currentValue,info.getType()), (Map<?,?>) parsedValue, objectifyStatics,typingIndex);
+            }
+            //Force return the custom reconstructor deserializer
+            else if(Initializers.useCustomReconstructor(info.getType())) {
+                return Initializers.construct((Map<Object,Object>)parsedValue,info.getType());
+            }
+            else {
+                Map<?, ?> map = (Map<?, ?>) parsedValue;
+                //Change target type to the appropriate type and obtain enum instances.
+                if (map.containsKey(Reserved.C_NAME)) {
+                    info = TypeInfo.cast(info, ClassToName.get(map.get(Reserved.C_NAME).toString()));
+                }
+                if (map.containsKey(Reserved.E_NAME)) {
+                    if (!info.getType().isEnum() && info.getType().getSuperclass().isEnum()) {
+                        currentValue = Enum.valueOf((Class) info.getType().getSuperclass(), map.get(Reserved.E_NAME).toString());
+                    } else {
+                        currentValue = Enum.valueOf((Class) info.getType(), map.get(Reserved.E_NAME).toString());
+                    }
+                } else {
+                    currentValue = Initializers.enforce(info.getType(), currentValue);
+                }
+                if(shouldStoreAsReference(info,objectifyStatics)){
+                   return currentValue;
+                }
+                if (Context.of(info.getType()).hasMappifiableTraits(info.getType() == Class.class)) {
+                    currentValue = Initializers.ensureNotNull(currentValue, info.getType());
+                    unmappify(currentValue, (Map<Object, Object>) parsedValue);
+                    return currentValue;
+                } else {
+                    throw new InvalidValueException("Parsed value is a Map but the expected type is of " + info.getType() + " which cannot be converted to from a map.");
+                }
+            }
         }
         return Stringify.objectify(info.getType(),parsedValue.toString());
     }
@@ -334,5 +354,19 @@ public class Mappifier {
             i++;
         }
         return arrayOut;
+    }
+
+    private boolean shouldStoreAsReference(TypeInfo info, boolean objectifyStatics){
+        if(info.getType() == Class.class || info.getType().isEnum()){
+            return !objectifyStatics;
+        }
+        return false;
+    }
+
+    private boolean shouldStoreAsReference(Object obj, boolean objectifyStatics){
+        if(obj instanceof Class || obj instanceof Enum){
+            return !objectifyStatics;
+        }
+        return false;
     }
 }

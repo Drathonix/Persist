@@ -145,8 +145,7 @@ public class GONOutInTest {
     public void testUnmappifyEnums(){
         genEditsAndTest(new TestObject6(), (out, wom) -> {
             out.add(genEdit(wom, TestUnmappableEnum.A,"enum1"));
-            out.add(genEdit(wom,"E","enum2","E_N_"));
-            out.add(genEdit(wom,0,"enum2","value"));
+            out.add(genEdit(wom,TestMappableEnum.E,"enum2"));
             for (TestMappableEnum value : TestMappableEnum.values()) {
                 out.add(genEdit(wom,value.ordinal()*99,"mappableEnumList",value.ordinal(),"value"));
             }
