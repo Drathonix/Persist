@@ -32,3 +32,5 @@ This marks the official introduction of "Objectified" and "Reference/Value" term
 Before 1.4.0 all Objects containing @Save fields were stored in Objectified format by default unless raw() was true. This is still the case barring a few exceptions.
 
 Enums and Classes are now stored in Reference/Value format. They will be Objectified only if they contain @Save fields and their storing fields are marked with @Objectified.
+
+# 1.4.1 - Fix a bug with Array storage where Boxed Primitive arrays are not able to be unmapped.

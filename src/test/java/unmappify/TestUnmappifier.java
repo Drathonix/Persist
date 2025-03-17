@@ -210,6 +210,7 @@ public class TestUnmappifier {
             out.add(genEdit(wom,ArrayTestObject.ints[3],"ints",3));
             out.add(genEdit(wom,ArrayTestObject.nestedBool[1][1],"nestedBool",1,1));
             out.add(genEdit(wom,ArrayTestObject.doubleNestedDoubles[1][0][1],"doubleNestedDoubles",1,0,1));
+            out.add(genEdit(wom,ArrayTestObject.nonPrim[3],"nonPrim",3));
         });
     }
 

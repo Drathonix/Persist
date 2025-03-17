@@ -225,7 +225,9 @@ public class MappifierTest {
         testValue(wom,ArrayTestObject.ints[3],"ints",3);
         testValue(wom,ArrayTestObject.nestedBool[1][1],"nestedBool",1,1);
         testValue(wom,ArrayTestObject.doubleNestedDoubles[1][0][1],"doubleNestedDoubles",1,0,1);
+        testValue(wom,ArrayTestObject.nonPrim[3],"nonPrim",3);
     }
+
 
     private <T extends Throwable> void assertThrowsInternal(Executable executable, String... messages){
         try{

@@ -16,4 +16,6 @@ public class ArrayTestObject {
                     new double[]{2387132987.219,-32.3211233
                     }
             }};
+    @Save
+    public static Integer[] nonPrim = new Integer[]{0,1,2,3,4,5};
 }
