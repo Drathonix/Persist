@@ -6,16 +6,19 @@ import com.vicious.persist.except.NoValuePresentException;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectList;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectMap;
 import com.vicious.persist.io.writer.wrapped.WrappedObject;
+import com.vicious.persist.mappify.reflect.ClassData;
 import com.vicious.persist.mappify.reflect.FieldData;
 import com.vicious.persist.mappify.reflect.TypeInfo;
 import com.vicious.persist.mappify.registry.Initializers;
 import com.vicious.persist.mappify.registry.Reserved;
 import com.vicious.persist.mappify.registry.Stringify;
 import com.vicious.persist.util.Boxing;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +34,7 @@ public class Mappifier {
         return new Mappifier();
     }
 
+    private final Initializers.DynamicConverter<?> converter = (field, index, object)-> this.unmappifyValue(field,null,field.objectified(),object,0);
     private boolean applyCommentsOnReservedFields = false;
     private boolean forceC_NAME = false;
 
@@ -93,7 +97,7 @@ public class Mappifier {
 
     private WrappedObject mappifyValue(TypeInfo info, Object value, boolean objectifyStatics, int typingIndex, String comment) {
         if (value == null) {
-            return WrappedObject.of(value, comment);
+            return WrappedObject.of(null, comment);
         }
         else if (shouldStoreAsReference(value, objectifyStatics)) {
             return mappifyAsReference(info, value, comment);
@@ -215,6 +219,49 @@ public class Mappifier {
         return applyCommentsOnReservedFields ? "DO NOT EDIT" : "";
     }
 
+    /**
+     * Initializes a new object using its generated initializer or using a default constructor, takes in an unordered map of key-arg entries.
+     */
+    @SuppressWarnings("all")
+    public <T> @NotNull T unmappifyThroughInit(@NotNull Class<T> type, Map<Object,Object> map){
+        ClassData data = ClassData.getClassData(type);
+        if(data.hasInitializer()){
+            return (T)data.getInitializer().constructMap(map,converter);
+        }
+        else{
+            T t = Initializers.initialize(type);
+            unmappify(t,map);
+            return t;
+        }
+    }
+
+    /**
+     * Initializes a new object using its generated initializer or using a default constructor, takes in an ordered list of args.
+     */
+    @SuppressWarnings("all")
+    public <T> @NotNull T unmappifyThroughInit(@NotNull Class<T> type, List<Object> orderedArgs){
+        ClassData data = ClassData.getClassData(type);
+        if(data.hasInitializer()){
+            return (T)data.getInitializer().constructList(orderedArgs,converter);
+        }
+        else{
+            throw new IllegalArgumentException(type + " does not have a generated initializer");
+        }
+    }
+
+    /**
+     * Initializes a new object using its generated initializer or using a default constructor, takes in one arg.
+     */
+    @SuppressWarnings("all")
+    public <T> @NotNull T unmappifyThroughInit(@NotNull Class<T> type, Object monoArg){
+        ClassData data = ClassData.getClassData(type);
+        if(data.hasInitializer()){
+            return (T)data.getInitializer().construct(monoArg,converter);
+        }
+        else{
+            throw new IllegalArgumentException(type + " does not have a generated initializer");
+        }
+    }
 
     /**
      * Writes a map's values to an objects Fields marked with {@link com.vicious.persist.annotations.Save}
@@ -267,6 +314,15 @@ public class Mappifier {
         }
     }
 
+    /**
+     * Converts a mappified value into an unmappified one.
+     * @param info TypeInfo containing the expected type of output and its generics.
+     * @param currentValue the current value. Can be null.
+     * @param objectifyStatics when true classes are stored in reference format.
+     * @param parsedValue the mappified value.
+     * @param typingIndex the typing index to get generics from.
+     * @return an unmappified Object.
+     */
     @SuppressWarnings({"unchecked","rawtypes"})
     private Object unmappifyValue(TypeInfo info, @Nullable Object currentValue, boolean objectifyStatics, Object parsedValue, int typingIndex){
         if(parsedValue == null){
@@ -290,9 +346,9 @@ public class Mappifier {
             if(info.isMap()){
                 return unmappifyMap(info, (Map<Object,Object>) Initializers.ensureNotNull(currentValue,info.getType()), (Map<?,?>) parsedValue, objectifyStatics,typingIndex);
             }
-            //Force return the custom reconstructor deserializer
+            // Force return the custom reconstructor deserializer
             else if(Initializers.useCustomReconstructor(info.getType())) {
-                return Initializers.construct((Map<Object,Object>)parsedValue,info.getType());
+                return ClassData.getClassData(info.getType()).getInitializer().constructMap((Map<Object,Object>)parsedValue,converter);
             }
             else {
                 Map<?, ?> map = (Map<?, ?>) parsedValue;

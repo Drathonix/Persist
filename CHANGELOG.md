@@ -34,3 +34,6 @@ Before 1.4.0 all Objects containing @Save fields were stored in Objectified form
 Enums and Classes are now stored in Reference/Value format. They will be Objectified only if they contain @Save fields and their storing fields are marked with @Objectified.
 
 # 1.4.1 - Fix a bug with Array storage where Boxed Primitive arrays are not able to be unmapped.
+
+# 1.4.2 - Add generated initializers. @Save.Constructor can be used to mark a constructor to be used as an initializer and provide parameter names in metadata.
+Initializers will be called when unmappifying objects instead of calling Field set operations.

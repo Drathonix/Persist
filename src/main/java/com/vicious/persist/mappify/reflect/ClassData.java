@@ -7,6 +7,7 @@ import com.vicious.persist.annotations.ReplaceKeys;
 import com.vicious.persist.except.InvalidAnnotationException;
 import com.vicious.persist.except.InvalidSavableElementException;
 import com.vicious.persist.mappify.Context;
+import com.vicious.persist.mappify.registry.Initializers;
 import com.vicious.persist.mappify.registry.Reserved;
 import com.vicious.persist.shortcuts.NotationFormat;
 import com.vicious.persist.util.ClassMap;
@@ -31,22 +32,26 @@ public class ClassData {
      * Map of all savable Fields by name or alt name. This is not a BiMap
      * A map of all Fields marked with {@link com.vicious.persist.annotations.Save} by savable name.
      */
+    @NotNull
     private final Map<String, FieldData<?>> nameToField = new LinkedHashMap<>();
 
     /**
      * Set of all unique Fields present in the class.
      */
+    @NotNull
     private final Set<FieldData<?>> savableFields = new LinkedHashSet<>();
 
     /**
      * The Fields marked with {@link com.vicious.persist.annotations.PersistentPath} by context (non-static or static)
      * There can only be a maximum of two.
      */
+    @NotNull
     private final PathFieldData<?>[] persistentPath = new PathFieldData[2];
     /**
      * A tree of key transformations that may be applied before object unmapping.
      */
     @SuppressWarnings("unchecked")
+    @NotNull
     private final StringTree<String>[] keyTransformations = new StringTree[2];
 
     /**
@@ -57,7 +62,15 @@ public class ClassData {
     /**
      * Set of all Fields that must be unmapped.
      */
+    @NotNull
     private final Set<FieldData<?>> requiredFields = new LinkedHashSet<>();
+
+    /**
+     * A special initializer for classes with @Save constructors. If this is present the constructor will be called when initializing the object.
+     * @since 1.4.2
+     */
+    @Nullable
+    private final Initializers.CustomConstructor<?> initializer;
 
     /**
      * Initializes the savableFields and persistentPath reference maps.
@@ -207,6 +220,7 @@ public class ClassData {
             }
         }
         transformerVer=tSum.get();
+        initializer = Initializers.tryGenerateCustomReconstructorFor(c,this);
     }
 
     /**
@@ -423,5 +437,23 @@ public class ClassData {
      */
     public Set<FieldData<?>> copyRequired() {
         return new HashSet<>(requiredFields);
+    }
+
+    /**
+     * Gets the custom constructor for this type if present.
+     * @return a custom constructor or null.
+     * @since 1.4.2
+     */
+    public @Nullable Initializers.CustomConstructor<?> getInitializer() {
+        return initializer;
+    }
+
+    /**
+     * Checks that there is a custom initializer generated for this type.
+     * @return true if there is an initializer available
+     * @since 1.4.2
+     */
+    public boolean hasInitializer() {
+        return initializer != null;
     }
 }
