@@ -33,7 +33,7 @@ public class Initializers {
     }
 
 
-    public static  <T> T initialize(Class<T> type){
+    public static <T> T initialize(Class<T> type){
         if(!initializers.containsKey(type)){
             try {
                 Constructor<T> constructor = type.getDeclaredConstructor();
@@ -184,6 +184,24 @@ public class Initializers {
                 throw new InvalidAnnotationException("Cannot generate constructor, missing significant metadata providing argument names. This is critical to ordering. Mark all parameters with @Save(name = \"<name here>\")");
             }
         }
+    }
+
+    public static boolean canGenerateInitializerFor(Class<?> cls) {
+        l1: for (Constructor<?> declaredConstructor : cls.getDeclaredConstructors()) {
+            if(declaredConstructor.isAnnotationPresent(Save.Constructor.class)){
+                return true;
+            }
+            if(declaredConstructor.getParameterCount() > 0){
+                for (Parameter parameter : declaredConstructor.getParameters()) {
+                    Save save = parameter.getAnnotation(Save.class);
+                    if(save == null){
+                        continue l1;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static class CustomConstructor<T> {

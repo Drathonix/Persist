@@ -4,16 +4,11 @@ An Annotation-Driven Persistence Library for Java.
 ```groovy
 repositories {
     maven {
-        url = uri("https://maven.pkg.github.com/Drathonix/Persist")
-        name = "GitHubPackages"
-        credentials {
-            username = System.getenv("GPR_USER")
-            password = System.getenv("GPR_API_KEY")
-        }
+        url = uri("https://panel.ryuutech.com/nexus/repository/maven-releases/")
     }
 }
 dependencies {
-    // Replace or use a gradle.property.
+    //                           Replace or use a gradle.property.
     implementation("com.vicious:persist:${persist_version}")
 }
 ```

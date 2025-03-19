@@ -65,8 +65,8 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
     private final boolean objectified;
 
 
-    public FieldData(T element, @Nullable Method setter) {
-        if(element instanceof Method && setter == null) {
+    public FieldData(T element, @Nullable Method setter, boolean hasInitializer) {
+        if(element instanceof Method && setter == null && !hasInitializer) {
             throw new InvalidSavableElementException("Method " + element.getName() + " in " + element.getDeclaringClass() + " annotated with @Save is missing a setter method annotated with @Save.Setter(" + element.getName() + ")");
         }
         this.getterElement = element;

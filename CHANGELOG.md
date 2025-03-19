@@ -37,3 +37,5 @@ Enums and Classes are now stored in Reference/Value format. They will be Objecti
 
 # 1.4.2 - Add generated initializers. @Save.Constructor can be used to mark a constructor to be used as an initializer and provide parameter names in metadata.
 Initializers will be called when unmappifying objects instead of calling Field set operations.
+
+# 1.4.5 - Now uploading directly to a public maven separate from github packages

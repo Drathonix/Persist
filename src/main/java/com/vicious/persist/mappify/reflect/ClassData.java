@@ -80,6 +80,7 @@ public class ClassData {
      */
     public ClassData(Class<?> c){
         AtomicInteger tSum = new AtomicInteger(0);
+        boolean hasInitializer = Initializers.canGenerateInitializerFor(c);
         ReflectionHelper.forEach(c, cls->{
             for (Method m1 : cls.getDeclaredMethods()) {
                 Save save = m1.getAnnotation(Save.class);
@@ -109,7 +110,7 @@ public class ClassData {
                         }
                     }
                     AltName altName = m1.getAnnotation(AltName.class);
-                    FieldData<?> data = new FieldData<>(m1,setter);
+                    FieldData<?> data = new FieldData<>(m1,setter,hasInitializer);
                     if(altName != null){
                         for (String s : altName.value()) {
                             if(!nameToField.containsKey(s) && !Reserved.isReserved(s)) {
@@ -153,7 +154,7 @@ public class ClassData {
                         }
                     }
                     AltName altName = field.getAnnotation(AltName.class);
-                    FieldData<?> data = new FieldData<>(field,setter);
+                    FieldData<?> data = new FieldData<>(field,setter,hasInitializer);
                     if(altName != null){
                         for (String s : altName.value()) {
                             if(!nameToField.containsKey(s) && !Reserved.isReserved(s)) {
@@ -219,8 +220,8 @@ public class ClassData {
                 requiredFields.add(value);
             }
         }
-        transformerVer=tSum.get();
         initializer = Initializers.tryGenerateCustomReconstructorFor(c,this);
+        transformerVer=tSum.get();
     }
 
     /**
