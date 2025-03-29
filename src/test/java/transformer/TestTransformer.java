@@ -1,6 +1,10 @@
 package transformer;
 
+import com.vicious.persist.io.writer.wrapped.WrappedObject;
+import com.vicious.persist.io.writer.wrapped.WrappedObjectMap;
+import com.vicious.persist.mappify.Mappifier;
 import com.vicious.persist.mappify.reflect.ClassData;
+import com.vicious.persist.shortcuts.NotationFormat;
 import com.vicious.persist.shortcuts.PersistShortcuts;
 import org.junit.jupiter.api.Test;
 
@@ -42,5 +46,14 @@ public class TestTransformer {
         assertEquals(0,ReplaceKeysAdvancedNew2.inner.inner2.k);
         assertEquals(1,ReplaceKeysAdvancedNew2.otherInner.inner2.k);
         assertEquals(1,ReplaceKeysAdvancedNew2.k);
+
+        //Test moving value from root to root/map
+        WrappedObjectMap wom = Mappifier.DEFAULT.mappify(ReplaceKeysA2Old.class);
+        wom.remove("inner");
+        wom.put("on", WrappedObject.of(true));
+        PersistShortcuts.saveAsFile(NotationFormat.JSON5,wom,ReplaceKeysA2Old.path);
+        assertFalse(ReplaceKeysA2New.inner.on);
+        PersistShortcuts.readFromFile(ReplaceKeysA2New.class);
+        assertTrue(ReplaceKeysA2New.inner.on);
     }
 }

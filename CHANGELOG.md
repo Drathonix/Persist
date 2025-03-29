@@ -39,3 +39,5 @@ Enums and Classes are now stored in Reference/Value format. They will be Objecti
 Initializers will be called when unmappifying objects instead of calling Field set operations.
 
 # 1.4.5 - Now uploading directly to a public maven separate from github packages
+
+# 1.4.6 - Fix a fatal bug with Transform keys due to missing array index.

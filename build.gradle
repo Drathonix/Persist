@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.vicious'
-version = '1.4.5'
+version = '1.4.6'
 
 repositories {
     mavenCentral()
@@ -35,14 +35,6 @@ tasks.withType(JavaCompile).configureEach {
 
 publishing {
     repositories {
-        /*maven {
-            name = "Persist"
-            url = uri("https://maven.pkg.github.com/Drathonix/Persist")
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
-                password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
-            }
-        }*/
         maven {
             url = "https://panel.ryuutech.com/nexus/repository/maven-releases/"
             credentials {

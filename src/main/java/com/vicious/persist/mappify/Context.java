@@ -133,7 +133,7 @@ public class Context {
                 String[] dest = replacement.split("/");
                 Map<Object,Object> sub = rootMap;
                 for (int i = 0; i < dest.length-1; i++) {
-                    sub = (Map<Object,Object>)sub.computeIfAbsent(dest,k->new HashMap<>());
+                    sub = (Map<Object,Object>)sub.computeIfAbsent(dest[i],k->new HashMap<>());
                 }
                 sub.put(dest[dest.length-1],val);
             } else if (depth+1 < treeDepth && map.get(str) instanceof Map && tree.containsNode(pth)) {
