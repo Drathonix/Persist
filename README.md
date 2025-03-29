@@ -14,7 +14,7 @@ dependencies {
 ```
 
 ### Getting Started
-For a more in depth explanation see [https://github.com/Drathonix/Persist/wiki/Getting-Started](the wiki).
+For a more in depth explanation see [the wiki](https://github.com/Drathonix/Persist/wiki/Getting-Started).
 
 ```java
 public class Example {
