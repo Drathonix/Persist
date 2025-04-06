@@ -1,9 +1,7 @@
 package com.vicious.persist.mappify.reflect;
 
-import com.vicious.persist.annotations.AltName;
-import com.vicious.persist.annotations.PersistentPath;
-import com.vicious.persist.annotations.Save;
-import com.vicious.persist.annotations.ReplaceKeys;
+import com.vicious.persist.Persist;
+import com.vicious.persist.annotations.*;
 import com.vicious.persist.except.InvalidAnnotationException;
 import com.vicious.persist.except.InvalidSavableElementException;
 import com.vicious.persist.mappify.Context;
@@ -18,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -39,7 +38,8 @@ public class ClassData {
      * Set of all unique Fields present in the class.
      */
     @NotNull
-    private final Set<FieldData<?>> savableFields = new LinkedHashSet<>();
+    @SuppressWarnings("unchecked")
+    private final LinkedHashSet<FieldData<?>>[] savableFields = new LinkedHashSet[2];
 
     /**
      * The Fields marked with {@link com.vicious.persist.annotations.PersistentPath} by context (non-static or static)
@@ -63,7 +63,8 @@ public class ClassData {
      * Set of all Fields that must be unmapped.
      */
     @NotNull
-    private final Set<FieldData<?>> requiredFields = new LinkedHashSet<>();
+    @SuppressWarnings("unchecked")
+    private final LinkedHashSet<FieldData<?>>[] requiredFields = new LinkedHashSet[2];
 
     /**
      * A special initializer for classes with @Save constructors. If this is present the constructor will be called when initializing the object.
@@ -73,14 +74,20 @@ public class ClassData {
     private final Initializers.CustomConstructor<?> initializer;
 
     /**
-     * Initializes the savableFields and persistentPath reference maps.
+     * Initializes the entire class data object.
      * @throws InvalidAnnotationException if an illegal annotation is detected.
      * @throws InvalidSavableElementException if an illegal {@link com.vicious.persist.annotations.Save} annotation is present.
      * @param c the class to build from.
      */
+    @SuppressWarnings("unchecked")
     public ClassData(Class<?> c){
+        for (int i = 0; i < 2; i++) {
+            savableFields[i] = new LinkedHashSet<>();
+            requiredFields[i] = new LinkedHashSet<>();
+        }
         AtomicInteger tSum = new AtomicInteger(0);
         boolean hasInitializer = Initializers.canGenerateInitializerFor(c);
+        AtomicBoolean hasPriorityOverrides = new AtomicBoolean(false);
         ReflectionHelper.forEach(c, cls->{
             for (Method m1 : cls.getDeclaredMethods()) {
                 Save save = m1.getAnnotation(Save.class);
@@ -119,7 +126,10 @@ public class ClassData {
                         }
                     }
                     nameToField.put(name, data);
-                    savableFields.add(data);
+                    savableFields[getStaticIDX(data.isStatic())].add(data);
+                    if(data.getPriority() > Integer.MIN_VALUE){
+                        hasPriorityOverrides.set(true);
+                    }
                 }
                 if(path != null){
                     int idx = Modifier.isStatic(m1.getModifiers()) ? 1 : 0;
@@ -163,7 +173,10 @@ public class ClassData {
                         }
                     }
                     nameToField.put(name, data);
-                    savableFields.add(data);
+                    savableFields[getStaticIDX(data.isStatic())].add(data);
+                    if(data.getPriority() > Integer.MIN_VALUE){
+                        hasPriorityOverrides.set(true);
+                    }
                 }
                 if(path != null){
                     int idx = Modifier.isStatic(field.getModifiers()) ? 1 : 0;
@@ -215,13 +228,44 @@ public class ClassData {
                 }
             }
         });
-        for (FieldData<?> value : savableFields) {
-            if(value.isRequired()){
-                requiredFields.add(value);
+        for (int i = 0; i < savableFields.length; i++) {
+            for (FieldData<?> value : savableFields[i]) {
+                if(value.isRequired()){
+                    requiredFields[i].add(value);
+                }
             }
         }
         initializer = Initializers.tryGenerateCustomReconstructorFor(c,this);
         transformerVer=tSum.get();
+        Ordering ord = c.getAnnotation(Ordering.class);
+        if(ord != null || hasPriorityOverrides.get()){
+            LinkedHashSet<FieldData<?>>[] reorderedFields = new LinkedHashSet[2];
+            for (int i = 0; i < 2; i++) {
+                reorderedFields[i] = new LinkedHashSet<>();
+            }
+            if(ord != null){
+                for (String s : ord.value()) {
+                    FieldData<?> fieldData = nameToField.get(s);
+                    if(fieldData == null){
+                        Persist.logger.warning("@Ordering in class " + c + " has field of name'" + s + "' listed but no @Save field of that name exists in the class hierarchy.");
+                        continue;
+                    }
+                    reorderedFields[getStaticIDX(fieldData.isStatic())].add(fieldData);
+                }
+            }
+            PriorityQueue<FieldData<?>> queue = new PriorityQueue<>(Comparator.comparing(FieldData::getPriority));
+            for (int i = 0; i < 2; i++) {
+                for (LinkedHashSet<FieldData<?>> set : savableFields) {
+                    queue.addAll(set);
+                }
+            }
+            ArrayList<FieldData<?>> lst = new ArrayList<>(queue);
+            for (int i = lst.size() - 1; i >= 0; i--) {
+                FieldData<?> fieldData = lst.get(i);
+                reorderedFields[getStaticIDX(fieldData.isStatic())].add(fieldData);
+            }
+            System.arraycopy(reorderedFields, 0, savableFields, 0, 2);
+        }
     }
 
     /**
@@ -262,11 +306,7 @@ public class ClassData {
      * @param accessor some arbitrary code to run on the {@link com.vicious.persist.mappify.reflect.FieldData} instance.
      */
     public void forEach(boolean isStatic, Consumer<FieldData<?>> accessor){
-        savableFields.forEach(field -> {
-            if(field.matchesStaticness(isStatic)) {
-                accessor.accept(field);
-            }
-        });
+        savableFields[getStaticIDX(isStatic)].forEach(accessor);
     }
 
     /**
@@ -275,12 +315,7 @@ public class ClassData {
      * @return if savable fields exist for the static context.
      */
     public boolean hasTraitsInContext(boolean isStatic) {
-        for (FieldData<?> value : savableFields) {
-            if(value.matchesStaticness(isStatic)) {
-                return true;
-            }
-        }
-        return false;
+        return !savableFields[getStaticIDX(isStatic)].isEmpty();
     }
 
     /**
@@ -310,6 +345,10 @@ public class ClassData {
         else{
             throw new IllegalArgumentException(context.getType() + " is missing an @PersistentPath annotated method or field in the " + (context.isStatic ? "static" : "non-static") + " context!");
         }
+    }
+
+    public int getStaticIDX(boolean isStatic){
+        return isStatic ? 1 : 0;
     }
 
     /**
@@ -436,8 +475,8 @@ public class ClassData {
      * Gets a copy of the class' required fields.
      * @return all required fields
      */
-    public Set<FieldData<?>> copyRequired() {
-        return new HashSet<>(requiredFields);
+    public Set<FieldData<?>> copyRequired(Context context) {
+        return new HashSet<>(requiredFields[getStaticIDX(context.isStatic)]);
     }
 
     /**

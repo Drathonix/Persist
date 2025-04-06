@@ -1,10 +1,10 @@
 {
-	"otherInner": {
+	"inner": {
 		"inner2": {
 			"k": 1
 		}
 	}, 
-	"inner": {
+	"otherInner": {
 		"inner2": {
 			"k": 1
 		}

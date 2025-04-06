@@ -64,6 +64,8 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
      */
     private final boolean objectified;
 
+    private final int priority;
+
 
     public FieldData(T element, @Nullable Method setter, boolean hasInitializer) {
         if(element instanceof Method && setter == null && !hasInitializer) {
@@ -107,10 +109,15 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
         this.typing = tempTyping;
         this.required = element.isAnnotationPresent(Required.class);
         this.objectified = element.isAnnotationPresent(Objectified.class);
+        this.priority = element.isAnnotationPresent(Priority.class) ? element.getAnnotation(Priority.class).value() : Integer.MIN_VALUE;
     }
 
     public boolean matchesStaticness(boolean isStatic) {
-        return (isStatic && Modifier.isStatic(getterElement.getModifiers())) || (!isStatic && !Modifier.isStatic(getterElement.getModifiers()));
+        return (isStatic && isStatic()) || (!isStatic && !isStatic());
+    }
+
+    public boolean isStatic(){
+        return Modifier.isStatic(getterElement.getModifiers());
     }
 
     /**
@@ -247,5 +254,9 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
      */
     public boolean isRequired() {
         return required;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 }

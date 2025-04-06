@@ -286,7 +286,7 @@ public class Mappifier {
         if(context.hasTransformations()){
             context.transform(map);
         }
-        Set<FieldData<?>> required = context.data.copyRequired();
+        Set<FieldData<?>> required = context.data.copyRequired(context);
         for (Object o : map.keySet()) {
             try {
                 context.whenPresent(Stringify.stringify(o), fieldData -> {

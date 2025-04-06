@@ -1,0 +1,13 @@
+{
+  "str_val": "namespace:key",
+  "set_val": [
+    "name1:key1",
+    "name2:key2",
+    "name3:key3"
+  ],
+  "map_val": {
+    "k1": "name1:key1",
+    "k2": "name2:key2",
+    "k3": "name3:key3"
+  }
+}

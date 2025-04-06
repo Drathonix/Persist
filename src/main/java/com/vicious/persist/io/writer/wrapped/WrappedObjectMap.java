@@ -1,6 +1,7 @@
 package com.vicious.persist.io.writer.wrapped;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Map;
  * @author Jack Andersen
  * @since 1.0
  */
-public class WrappedObjectMap extends HashMap<Object,WrappedObject> implements IWrapped<Map<Object,Object>> {
+public class WrappedObjectMap extends LinkedHashMap<Object,WrappedObject> implements IWrapped<Map<Object,Object>> {
     public Map<Object,Object> unwrap(){
         Map<Object,Object> out = new HashMap<>();
         for (Object key : keySet()) {
