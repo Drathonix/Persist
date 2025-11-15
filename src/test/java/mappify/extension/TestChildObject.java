@@ -1,6 +1,7 @@
 package mappify.extension;
 
 import com.vicious.persist.annotations.Save;
+import com.vicious.persist.mappify.reflect.ClassData;
 
 public class TestChildObject extends TestParentObject{
     public double h = 10.0;

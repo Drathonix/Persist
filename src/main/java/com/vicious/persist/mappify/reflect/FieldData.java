@@ -320,13 +320,23 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
     }
 
     /**
+     * Checks if the value currently stored in the field is the default.
      * @since 1.4.8
-     * @return
+     * @return true if has changed.
      */
     public boolean isNotDefault(Context ctx) {
         if(hasDefaultValue()){
             return !getDefaultValue().equals(get(ctx));
         }
         return true;
+    }
+
+    /**
+     * Gets the {@link AltName} annotation from the getter if present.
+     * @since 1.5.0
+     * @return null or full annotation.
+     */
+    public @Nullable AltName getAltName() {
+        return getterElement.getAnnotation(AltName.class);
     }
 }

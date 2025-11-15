@@ -88,8 +88,14 @@ public class ClassData {
         AtomicInteger tSum = new AtomicInteger(0);
         boolean hasInitializer = Initializers.canGenerateInitializerFor(c);
         AtomicBoolean hasPriorityOverrides = new AtomicBoolean(false);
+        FieldDataBuilder.Builders builders = new FieldDataBuilder.Builders();
         ReflectionHelper.forEach(c, cls->{
             for (Method m1 : cls.getDeclaredMethods()) {
+                Save.Setter m1setter = m1.getAnnotation(Save.Setter.class);
+                if(m1setter != null){
+                    builders.getBuilder(m1setter.value()).setterNoOverride(m1);
+                    continue;
+                }
                 Save save = m1.getAnnotation(Save.class);
                 PersistentPath path = m1.getAnnotation(PersistentPath.class);
                 if(save != null){
@@ -100,39 +106,10 @@ public class ClassData {
                     if(Reserved.isReserved(name)){
                         throw new InvalidSavableElementException("Method " + m1.getName() + " in " + m1.getDeclaringClass() + " @Save(\"" + name + "\"), has a reserved name! Use a different name.");
                     }
-                    if(nameToField.containsKey(name)){
-                        continue;
-                    }
-                    Method setter = null;
-                    for (Method declaredMethod : cls.getDeclaredMethods()) {
-                        Save.Setter saveSetter = declaredMethod.getAnnotation(Save.Setter.class);
-                        if(saveSetter != null){
-                            if(Modifier.isAbstract(declaredMethod.getModifiers())){
-                                throw new InvalidAnnotationException("Abstract method " + declaredMethod.getName() + " in " + declaredMethod.getDeclaringClass() + " @Save.Setter(\"" + saveSetter.value() + "\"), this is illegal. Maybe you should create a wrapper method instead.");
-                            }
-                            if(saveSetter.value().equals(name) && staticMatches(m1,declaredMethod)){
-                                setter = declaredMethod;
-                                break;
-                            }
-                        }
-                    }
-                    AltName altName = m1.getAnnotation(AltName.class);
-                    FieldData<?> data = new FieldData<>(source,m1,setter,hasInitializer);
-                    if(altName != null){
-                        for (String s : altName.value()) {
-                            if(!nameToField.containsKey(s) && !Reserved.isReserved(s)) {
-                                nameToField.put(s, data);
-                            }
-                        }
-                    }
-                    nameToField.put(name, data);
-                    savableFields[getStaticIDX(data.isStatic())].add(data);
-                    if(data.getPriority() > Integer.MIN_VALUE){
-                        hasPriorityOverrides.set(true);
-                    }
+                    builders.getBuilder(name).getterNoOverride(m1);
                 }
                 if(path != null){
-                    int idx = Modifier.isStatic(m1.getModifiers()) ? 1 : 0;
+                    int idx = getStaticIDX(Modifier.isStatic(m1.getModifiers()));
                     if(persistentPath[idx] != null){
                         continue;
                     }
@@ -153,30 +130,7 @@ public class ClassData {
                     if(Reserved.isReserved(name)){
                         throw new InvalidSavableElementException("Field " + field.getName() + " in " + field.getDeclaringClass() + " @Save(\"" + name + "\"), has a reserved name! Use a different name.");
                     }
-                    Method setter = null;
-                    for (Method declaredMethod : cls.getDeclaredMethods()) {
-                        Save.Setter saveSetter = declaredMethod.getAnnotation(Save.Setter.class);
-                        if(saveSetter != null){
-                            if(saveSetter.value().equals(name) && staticMatches(field,declaredMethod)){
-                                setter = declaredMethod;
-                                break;
-                            }
-                        }
-                    }
-                    AltName altName = field.getAnnotation(AltName.class);
-                    FieldData<?> data = new FieldData<>(source,field,setter,hasInitializer);
-                    if(altName != null){
-                        for (String s : altName.value()) {
-                            if(!nameToField.containsKey(s) && !Reserved.isReserved(s)) {
-                                nameToField.put(s, data);
-                            }
-                        }
-                    }
-                    nameToField.put(name, data);
-                    savableFields[getStaticIDX(data.isStatic())].add(data);
-                    if(data.getPriority() > Integer.MIN_VALUE){
-                        hasPriorityOverrides.set(true);
-                    }
+                    builders.getBuilder(name).getterNoOverride(field);
                 }
                 if(path != null){
                     int idx = Modifier.isStatic(field.getModifiers()) ? 1 : 0;
@@ -228,6 +182,23 @@ public class ClassData {
                 }
             }
         });
+        builders.forEach((name,value)->{
+            FieldData<?> data = value.build(source,hasInitializer);
+            AltName altName = data.getAltName();
+            if(altName != null){
+                for (String s : altName.value()) {
+                    if(!nameToField.containsKey(s) && !Reserved.isReserved(s)) {
+                        nameToField.put(s, data);
+                    }
+                }
+            }
+            nameToField.put(name, data);
+            savableFields[getStaticIDX(data.isStatic())].add(data);
+            if(data.getPriority() > Integer.MIN_VALUE){
+                hasPriorityOverrides.set(true);
+            }
+        });
+        System.out.println(builders);
         for (int i = 0; i < savableFields.length; i++) {
             for (FieldData<?> value : savableFields[i]) {
                 if(value.isRequired()){
@@ -295,7 +266,7 @@ public class ClassData {
      * Checks if two methods have the same static-ness.
      * @return if the methods have the same static modifier.
      */
-    private boolean staticMatches(Member m1, Method declaredMethod) {
+    public static boolean staticMatches(Member m1, Method declaredMethod) {
         return (Modifier.isStatic(m1.getModifiers()) && Modifier.isStatic(declaredMethod.getModifiers()))
                 || (!Modifier.isStatic(m1.getModifiers()) && !Modifier.isStatic(declaredMethod.getModifiers()));
     }

@@ -21,6 +21,7 @@ import mappify.map.except.BadTestObject2a;
 import mappify.map.except.BadTestObject2b;
 import mappify.map.TestObject2;
 import mappify.setter.TestObject5;
+import mappify.setter.TestObjectInheritance;
 import mappify.setter.except.BadTestObject5;
 import mappify.special.TestObjectWeirdKeys;
 import mappify.special.TestSpecialObject;
@@ -226,6 +227,17 @@ public class MappifierTest {
         testValue(wom,ArrayTestObject.nestedBool[1][1],"nestedBool",1,1);
         testValue(wom,ArrayTestObject.doubleNestedDoubles[1][0][1],"doubleNestedDoubles",1,0,1);
         testValue(wom,ArrayTestObject.nonPrim[3],"nonPrim",3);
+    }
+
+    @Test
+    public void testSetterInheritance(){
+        TestObjectInheritance toi = new TestObjectInheritance();
+        WrappedObjectMap wom = mappifier.mappify(toi);
+        testValue(wom,0,"int0");
+        testValue(wom,1,"int1");
+        mappifier.unmappify(toi, wom);
+        assertTrue(toi.worked0);
+        assertTrue(toi.worked1);
     }
 
 
