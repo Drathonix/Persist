@@ -370,7 +370,7 @@ public class Mappifier {
                 if(shouldStoreAsReference(info,objectifyStatics)){
                    return currentValue;
                 }
-                if (Context.of(info.getType()).hasMappifiableTraits(info.getType() == Class.class)) {
+                if (Context.of(currentValue != null ? currentValue : info.getType()).hasMappifiableTraits(info.getType() == Class.class)) {
                     currentValue = Initializers.ensureNotNull(currentValue, info.getType());
                     unmappify(currentValue, (Map<Object, Object>) parsedValue);
                     return currentValue;
