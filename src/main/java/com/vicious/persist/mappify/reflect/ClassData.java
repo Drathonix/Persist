@@ -80,7 +80,7 @@ public class ClassData {
      * @param c the class to build from.
      */
     @SuppressWarnings("unchecked")
-    public ClassData(Class<?> c){
+    public ClassData(Object source, Class<?> c){
         for (int i = 0; i < 2; i++) {
             savableFields[i] = new LinkedHashSet<>();
             requiredFields[i] = new LinkedHashSet<>();
@@ -117,7 +117,7 @@ public class ClassData {
                         }
                     }
                     AltName altName = m1.getAnnotation(AltName.class);
-                    FieldData<?> data = new FieldData<>(m1,setter,hasInitializer);
+                    FieldData<?> data = new FieldData<>(source,m1,setter,hasInitializer);
                     if(altName != null){
                         for (String s : altName.value()) {
                             if(!nameToField.containsKey(s) && !Reserved.isReserved(s)) {
@@ -164,7 +164,7 @@ public class ClassData {
                         }
                     }
                     AltName altName = field.getAnnotation(AltName.class);
-                    FieldData<?> data = new FieldData<>(field,setter,hasInitializer);
+                    FieldData<?> data = new FieldData<>(source,field,setter,hasInitializer);
                     if(altName != null){
                         for (String s : altName.value()) {
                             if(!nameToField.containsKey(s) && !Reserved.isReserved(s)) {
@@ -275,10 +275,10 @@ public class ClassData {
      */
     public static @NotNull ClassData getClassData(@NotNull Object object){
         if(object instanceof Class<?>){
-            return getClassData((Class<?>)object);
+            return getClassData(object,(Class<?>)object);
         }
         else{
-            return getClassData(object.getClass());
+            return getClassData(object,object.getClass());
         }
     }
 
@@ -287,8 +287,8 @@ public class ClassData {
      * @param type the class to use.
      * @return A ClassData object.
      */
-    public static synchronized @NotNull ClassData getClassData(Class<?> type) {
-        return classData.computeIfAbsent(type, ClassData::new);
+    public static synchronized @NotNull ClassData getClassData(Object instance, Class<?> type) {
+        return classData.computeIfAbsent(type, k->new ClassData(instance == null ? type : instance, type));
     }
 
     /**

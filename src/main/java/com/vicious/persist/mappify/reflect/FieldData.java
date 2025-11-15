@@ -11,6 +11,7 @@ import java.lang.reflect.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents a savable element's annotations and its getter and setter functions.
@@ -62,12 +63,19 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
     /**
      * When true enums will be stored in Object format rather than in Reference format.
      */
+
+    @SuppressWarnings("all")
+    /**
+     * Is set when annotated with {@link DoNotSaveDefault}
+     * @since 1.4.8
+     */
+    public final Optional<Object> defaultValue;
+
     private final boolean objectified;
 
     private final int priority;
 
-
-    public FieldData(T element, @Nullable Method setter, boolean hasInitializer) {
+    public FieldData(Object source, T element, @Nullable Method setter, boolean hasInitializer) {
         if(element instanceof Method && setter == null && !hasInitializer) {
             throw new InvalidSavableElementException("Method " + element.getName() + " in " + element.getDeclaringClass() + " annotated with @Save is missing a setter method annotated with @Save.Setter(" + element.getName() + ")");
         }
@@ -110,6 +118,12 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
         this.required = element.isAnnotationPresent(Required.class);
         this.objectified = element.isAnnotationPresent(Objectified.class);
         this.priority = element.isAnnotationPresent(Priority.class) ? element.getAnnotation(Priority.class).value() : Integer.MIN_VALUE;
+        if(element.isAnnotationPresent(DoNotSaveDefault.class)){
+            Object def = getDefault(source);
+            this.defaultValue = Optional.ofNullable(def);
+        } else {
+            this.defaultValue=null;
+        }
     }
 
     public boolean matchesStaticness(boolean isStatic) {
@@ -132,6 +146,28 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
             }
             else if(getterElement instanceof Method){
                 return ((Method) getterElement).invoke(context.source);
+            }
+            throw new IllegalStateException("Impossible state.");
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Cannot access field ",e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException("Could not invoke field getter method",e);
+        }
+    }
+
+    /**
+     * Gets the default value, should only be called once.
+     * @since 1.4.8
+     * @param source
+     * @return
+     */
+    private @Nullable Object getDefault(Object source) {
+        try {
+            if(getterElement instanceof Field) {
+                return ((Field) getterElement).get(source);
+            }
+            else if(getterElement instanceof Method){
+                return ((Method) getterElement).invoke(source);
             }
             throw new IllegalStateException("Impossible state.");
         } catch (IllegalAccessException e) {
@@ -193,6 +229,29 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
         } catch (InvocationTargetException e) {
             throw new RuntimeException("Could not invoke field setter method", e);
         }
+    }
+
+    /**
+     * Checks if the field has a default value.
+     * @since 1.4.8
+     * @return
+     */
+    @SuppressWarnings("all")
+    public boolean hasDefaultValue(){
+        return defaultValue != null;
+    }
+
+    /**
+     * Returns the default value, can be null. The return value must not be modified.
+     * @since 1.4.8
+     * @return null or non-null.
+     */
+    @SuppressWarnings("all")
+    public Object getDefaultValue() {
+        if(defaultValue == null){
+            throw new NullPointerException("There is no default value for this field. Add @Defaulted to require it saved.");
+        }
+        return defaultValue.get();
     }
 
     public String getName(){
@@ -258,5 +317,16 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
 
     public int getPriority() {
         return priority;
+    }
+
+    /**
+     * @since 1.4.8
+     * @return
+     */
+    public boolean isNotDefault(Context ctx) {
+        if(hasDefaultValue()){
+            return !getDefaultValue().equals(get(ctx));
+        }
+        return true;
     }
 }

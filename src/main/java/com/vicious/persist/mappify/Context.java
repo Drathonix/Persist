@@ -61,7 +61,7 @@ public class Context {
         this.isArray = source instanceof Array;
         this.type = isEnum ? ((Enum<?>) source).getDeclaringClass() : isStatic ? (Class<?>)source : source.getClass();
         this.source=source;
-        this.data = ClassData.getClassData(this.type);
+        this.data = ClassData.getClassData(source,type);
     }
 
     /**

@@ -79,7 +79,9 @@ public class Mappifier {
     private WrappedObjectMap mappify(Context context) {
         WrappedObjectMap output = new WrappedObjectMap();
         context.forEach(fieldData -> {
-            output.put(fieldData.getName(), mappify(fieldData, context, fieldData.objectified()));
+            if(fieldData.isNotDefault(context)) {
+                output.put(fieldData.getName(), mappify(fieldData, context, fieldData.objectified()));
+            }
         });
         if (context.hasTransformations()) {
             output.put(Reserved.TRANSFORMER_VER, WrappedObject.of(context.getTransformerVer(), reservedComment()));

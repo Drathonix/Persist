@@ -33,10 +33,11 @@ tasks.withType(JavaCompile).configureEach {
     options.release.set(8)
 }
 
+
 publishing {
     repositories {
         maven {
-            url = "https://panel.ryuutech.com/nexus/repository/maven-releases/"
+            url = "https://maven.ryuutech.com/repository/maven-releases/"
             credentials {
                 username = System.getenv("MVN_NAME")
                 password = System.getenv("MVN_KEY")
