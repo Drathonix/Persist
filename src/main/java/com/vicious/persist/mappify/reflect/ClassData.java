@@ -198,7 +198,6 @@ public class ClassData {
                 hasPriorityOverrides.set(true);
             }
         });
-        System.out.println(builders);
         for (int i = 0; i < savableFields.length; i++) {
             for (FieldData<?> value : savableFields[i]) {
                 if(value.isRequired()){
