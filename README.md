@@ -4,7 +4,7 @@ An Annotation-Driven Persistence Library for Java.
 ```groovy
 repositories {
     maven {
-        url = uri("https://panel.ryuutech.com/nexus/repository/maven-releases/")
+        url = uri("https://maven.ryuutech.com/repository/maven-releases/")
     }
 }
 dependencies {
