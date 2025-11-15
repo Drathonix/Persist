@@ -3,6 +3,7 @@ package com.vicious.persist.mappify.reflect;
 import com.vicious.persist.annotations.*;
 import com.vicious.persist.except.InvalidSavableElementException;
 import com.vicious.persist.mappify.Context;
+import com.vicious.persist.mappify.registry.Initializers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -163,6 +164,9 @@ public class FieldData<T extends AccessibleObject & Member> implements TypeInfo 
      */
     private @Nullable Object getDefault(Object source) {
         try {
+            if(!isStatic() && source instanceof Class<?>){
+                source = Initializers.initialize((Class<?>)source);
+            }
             if(getterElement instanceof Field) {
                 return ((Field) getterElement).get(source);
             }

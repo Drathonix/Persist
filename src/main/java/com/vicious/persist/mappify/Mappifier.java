@@ -348,15 +348,15 @@ public class Mappifier {
             if(info.isMap()){
                 return unmappifyMap(info, (Map<Object,Object>) Initializers.ensureNotNull(currentValue,info.getType()), (Map<?,?>) parsedValue, objectifyStatics,typingIndex);
             }
-            // Force return the custom reconstructor deserializer
-            else if(Initializers.useCustomReconstructor(currentValue,info.getType())) {
-                return ClassData.getClassData(info.getType()).getInitializer().constructMap((Map<Object,Object>)parsedValue,converter);
-            }
             else {
                 Map<?, ?> map = (Map<?, ?>) parsedValue;
                 //Change target type to the appropriate type and obtain enum instances.
                 if (map.containsKey(Reserved.C_NAME)) {
                     info = TypeInfo.cast(info, ClassToName.get(map.get(Reserved.C_NAME).toString()));
+                }
+                // Force return the custom reconstructor deserializer
+                if(Initializers.useCustomReconstructor(currentValue,info.getType())) {
+                    return ClassData.getClassData(info.getType()).getInitializer().constructMap((Map<Object,Object>)parsedValue,converter);
                 }
                 if (map.containsKey(Reserved.E_NAME)) {
                     if (!info.getType().isEnum() && info.getType().getSuperclass().isEnum()) {

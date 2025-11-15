@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Warning: This does not work yet for all object types. If an object is not immutable then this setting may not work.
+ * In addition, when used non-statically the declaring class must have a default constructor.
  * Known working objects: All primitives, Strings, Immutable Maps and Collections. Arrays are the exception to the
  * immutability rule as persist always re-instantiates them when unmapping then.
  * If a field has this annotation it will not be saved if its current value is equal to the initial value of the field.
