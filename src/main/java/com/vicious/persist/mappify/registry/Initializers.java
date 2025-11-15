@@ -66,8 +66,8 @@ public class Initializers {
         return (T) value;
     }
 
-    public static boolean useCustomReconstructor(Class<?> type) {
-        return ClassData.getClassData(type).hasInitializer();
+    public static boolean useCustomReconstructor(@Nullable Object current, @NotNull Class<?> type) {
+        return ClassData.getClassData(current,type).hasInitializer();
     }
 
     public static <T> CustomConstructor<?> tryGenerateCustomReconstructorFor(Class<T> cls, ClassData data){

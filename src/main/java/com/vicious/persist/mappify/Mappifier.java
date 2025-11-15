@@ -349,7 +349,7 @@ public class Mappifier {
                 return unmappifyMap(info, (Map<Object,Object>) Initializers.ensureNotNull(currentValue,info.getType()), (Map<?,?>) parsedValue, objectifyStatics,typingIndex);
             }
             // Force return the custom reconstructor deserializer
-            else if(Initializers.useCustomReconstructor(info.getType())) {
+            else if(Initializers.useCustomReconstructor(currentValue,info.getType())) {
                 return ClassData.getClassData(info.getType()).getInitializer().constructMap((Map<Object,Object>)parsedValue,converter);
             }
             else {
