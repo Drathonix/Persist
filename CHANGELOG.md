@@ -47,3 +47,4 @@ Also fixed a bug where classes containing required static and non-static fields 
 WrappedObjectMap now extends LinkedHashMap so class level ordering should be maintained now.
 
 # 1.5.2 - Fixed a bug with JSON parsing where having a key ender in the name would prematurely end the key parsing.
+# 1.5.4 - Fixed a bug with JSON parsing where having a value ender in a string value would prematurely end the value parsing.

@@ -219,12 +219,21 @@ public class TestUnmappifier {
         });
     }
 
+    // This tests a bug which used to result in a crash, no validity checks needed.
     @Test
     public void testTerminatorInQuotedStringSafety(){
         TestObjExtraneous obj = new TestObjExtraneous();
         String json = "{\"in.k.l\":{\"inners\":{\"ke:y1\":{\"x\":1},\"key2\":{\"x\":2}}},\"nonsense\":127}";
         Map map = NotationFormat.JSON.parse(new ByteArrayInputStream(json.getBytes()));
         Mappifier.DEFAULT.unmappify(obj,map);
+    }
+
+    @Test
+    public void testTerminatorInStringSafety(){
+        String json = "{\"key\":\"hi,j\",\"dee\":1}";
+        Map map = NotationFormat.JSON.parse(new ByteArrayInputStream(json.getBytes()));
+        assertEquals("hi,j",map.get("key"));
+        assertEquals(1L,map.get("dee"));
     }
 
     private void genEditsAndTest(Object target, BiConsumer<List<SearchObj>,WrappedObjectMap> consumer) {

@@ -142,14 +142,18 @@ public abstract class ParserBase implements IParser {
             }
             AssumedType type = AssumedType.UNKNOWN.append(getCurrentToken());
             value.append(getCurrentToken());
+            boolean needsQuote = getCurrentToken() == '"';
             while (view.isSafe()) {
                 view.read();
-                if(!isEndOfValue()) {
+                if(needsQuote || !isEndOfValue(type)) {
                     value.append(getCurrentToken());
                     type = type.append(getCurrentToken());
                 }
                 else{
                     return trimValue(value.toString(), type);
+                }
+                if(needsQuote && getCurrentToken() == '"' && !isEscaped()){
+                    needsQuote = false;
                 }
             }
             return trimValue(value.toString(), type);
@@ -174,7 +178,7 @@ public abstract class ParserBase implements IParser {
         return value;
     }
 
-    protected boolean isEndOfValue() {
+    protected boolean isEndOfValue(AssumedType type) {
         char current = getCurrentToken();
         return !isEscaped() && (
                 isNewline(current) ||

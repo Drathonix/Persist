@@ -94,7 +94,7 @@ public class Stringify {
         }
         Converter<T> converter = (Converter<T>) converters.get(cls);
         if (converter == null) {
-            throw new IllegalArgumentException("No toObject converter registered for " + cls);
+            throw new IllegalArgumentException("No toObject converter registered for " + cls + " for string: " + str);
         }
         else{
             return converter.stringToObject.apply(str);
