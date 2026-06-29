@@ -45,3 +45,5 @@ Initializers will be called when unmappifying objects instead of calling Field s
 # 1.4.7 - Added @Priority and @Ordering both of which allow further control over field saving order.
 Also fixed a bug where classes containing required static and non-static fields would not be able to be deserialized properly.
 WrappedObjectMap now extends LinkedHashMap so class level ordering should be maintained now.
+
+# 1.5.2 - Fixed a bug with JSON parsing where having a key ender in the name would prematurely end the key parsing.

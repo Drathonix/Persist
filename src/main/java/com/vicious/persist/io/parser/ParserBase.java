@@ -68,7 +68,7 @@ public abstract class ParserBase implements IParser {
 
     protected boolean skipIrrelevantData() {
         try {
-            while (view.isSafe()) {
+            while (view.hasCurrent()) {
                 if(!isEscaped()){
                     updateCommentState();
                     if(inComment()){
@@ -98,8 +98,15 @@ public abstract class ParserBase implements IParser {
     protected String readKey(){
         try {
             StringBuilder key = new StringBuilder();
+            boolean lookingForQuote = false;
             while (view.isSafe()) {
-                if(!isNameTerminus()) {
+                if(lookingForQuote || !isNameTerminus()) {
+                    if(!lookingForQuote && getCurrentToken() == '"'){
+                        lookingForQuote = true;
+                    }
+                    else if(lookingForQuote && getCurrentToken() == '"' && !isEscaped()){
+                        lookingForQuote = false;
+                    }
                     key.append(getCurrentToken());
                 }
                 else{
@@ -178,7 +185,7 @@ public abstract class ParserBase implements IParser {
 
     protected boolean isNameTerminus() {
         char current = getCurrentToken();
-        return !isEscaped() && current == '=' || current == ':';
+        return !isEscaped() && (current == '=' || current == ':');
     }
 
 

@@ -1,9 +1,11 @@
 package unmappify;
 
 import com.vicious.persist.Persist;
+import com.vicious.persist.io.parser.gon.GONParser;
 import com.vicious.persist.io.writer.wrapped.WrappedObject;
 import com.vicious.persist.io.writer.wrapped.WrappedObjectMap;
 import com.vicious.persist.mappify.Mappifier;
+import com.vicious.persist.shortcuts.NotationFormat;
 import mappify.TestObject1;
 import mappify.array.ArrayTestObject;
 import mappify.collection.TestObject3;
@@ -22,6 +24,7 @@ import mappify.map.except.BadTestObject2;
 import mappify.map.except.BadTestObject2a;
 import mappify.map.except.BadTestObject2b;
 import mappify.setter.TestObject5;
+import mappify.setter.TestObjectInheritance;
 import mappify.setter.except.BadTestObject5;
 import mappify.special.TestObjectWeirdKeys;
 import mappify.special.TestSpecialObject;
@@ -32,6 +35,8 @@ import org.junit.jupiter.api.function.Executable;
 import org.opentest4j.AssertionFailedError;
 
 import java.awt.*;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -212,6 +217,14 @@ public class TestUnmappifier {
             out.add(genEdit(wom,ArrayTestObject.doubleNestedDoubles[1][0][1],"doubleNestedDoubles",1,0,1));
             out.add(genEdit(wom,ArrayTestObject.nonPrim[3],"nonPrim",3));
         });
+    }
+
+    @Test
+    public void testTerminatorInQuotedStringSafety(){
+        TestObjExtraneous obj = new TestObjExtraneous();
+        String json = "{\"in.k.l\":{\"inners\":{\"ke:y1\":{\"x\":1},\"key2\":{\"x\":2}}},\"nonsense\":127}";
+        Map map = NotationFormat.JSON.parse(new ByteArrayInputStream(json.getBytes()));
+        Mappifier.DEFAULT.unmappify(obj,map);
     }
 
     private void genEditsAndTest(Object target, BiConsumer<List<SearchObj>,WrappedObjectMap> consumer) {

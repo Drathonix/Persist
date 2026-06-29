@@ -67,4 +67,8 @@ public class TokenView {
         }
         return out + "]";
     }
+
+    public boolean hasCurrent() {
+        return (int)tokens[1] != 0;
+    }
 }
