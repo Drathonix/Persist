@@ -29,7 +29,7 @@ public class Example {
          //First reads the file if it exists.
          PersistShortcuts.readFromFile(Example.class);
          System.out.println(projectName + ":" + exampleVersion);
-         if(exampleVersion = -1){
+         if(exampleVersion == -1){
              //This change will be saved to file if it occurs.
              exampleVersion=2;
          }
